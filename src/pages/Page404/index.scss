@@ -1,0 +1,23 @@
+// error page style
+
+.container-404 {
+  height: 100%;
+  // color: $color-n2-5;
+  background: #fff;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  .container-404-imgbox {
+    display: flex;
+    justify-content: center;
+  }
+
+  > h2 {
+    font-size: 24px;
+    font-weight: inherit;
+    color: inherit;
+  }
+}

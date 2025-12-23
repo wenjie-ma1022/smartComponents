@@ -1,0 +1,56 @@
+{
+  "request": {
+    "servers": {
+      "ATTENDANCEOLD": {
+        "mock": "https://mocks.sto.cn/mock/control-tower-ipark",
+        "dev": "http://127.0.0.1:3000",
+        "test": "https://ipark-attendanceold-test.sto.cn",
+        "pre": "https://pre-ipark-attendanceold.sto.cn",
+        "prod": "https://ipark-attendanceold.sto.cn"
+      },
+      "ROAD": {
+        "mock": "https://mocks.sto.cn/mock/control-tower-ipark",
+        "dev": "http://127.0.0.1:3000",
+        "test": "https://ipark-road-test.sto.cn",
+        "pre": "https://pre-ipark-road.sto.cn",
+        "prod": "https://ipark-road.sto.cn"
+      },
+      "BUSINESS": {
+        "mock": "https://mocks.sto.cn/mock/control-tower-ipark",
+        "dev": "http://127.0.0.1:3000",
+        "test": "https://ipark-business-test.sto.cn",
+        "pre": "https://pre-ipark-business.sto.cn",
+        "prod": "https://ipark-business.sto.cn"
+      },
+      "ASGARD": {
+        "mock": "https://mocks.sto.cn/mock/control-tower-ipark",
+        "dev": "http://127.0.0.1:3000",
+        "test": "https://asgard-api-test.sto.cn",
+        "pre": "https://pre-asgard-api.sto.cn",
+        "prod": "https://asgard-api.sto.cn"
+      },
+      "XMAN": {
+        "mock": "https://mocks.sto.cn/mock/control-tower-ipark",
+        "dev": "http://127.0.0.1:3000",
+        "test": "https://ipark-xman-test.sto.cn",
+        "pre": "https://pre-ipark-xman.sto.cn",
+        "prod": "https://ipark-xman.sto.cn"
+      },
+      "ASGARD_STO": {
+        "mock": "https://mocks.sto.cn/mock/control-tower-ipark",
+        "dev": "http://127.0.0.1:3000",
+        "test": "https://asgard-stoapi-test.sto.cn",
+        "pre": "https://pre-asgard-stoapi.sto.cn",
+        "prod": "https://asgard-stoapi.sto.cn"
+      }
+    },
+    "names": {},
+    "auths": {
+      "type": "url",
+      "key": "cookie_id",
+      "name": "cookie_name",
+      "token": "",
+      "addAuth": true
+    }
+  }
+}

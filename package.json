@@ -1,0 +1,59 @@
+{
+  "name": "pc-template",
+  "private": true,
+  "version": "0.1.0",
+  "description": "PC ice2.0 模板",
+  "scripts": {
+    "start": "icejs start --host localhost --port 3000",
+    "build": "icejs build",
+    "prepublishOnly": "npm run build",
+    "lint": "npm run eslint && npm run stylelint",
+    "eslint": "eslint --cache --ext .js,.jsx,.ts,.tsx --ignore-pattern '**/*.d.ts' ./",
+    "eslint:fix": "npm run eslint -- --fix",
+    "stylelint": "stylelint \"**/*.{css,scss,less}\"",
+    "cat-fix": "cat fix",
+    "prepare": "husky install"
+  },
+  "dependencies": {
+    "@alicd/micro-stark": "^0.2.2",
+    "@alifd/theme-sto-small": "^0.4.14",
+    "@cainiaofe/cn-ui": "^0.10.6",
+    "@sto/asgard-auth": "^1.3.0",
+    "@sto/cn-ui": "^0.15.0",
+    "@sto/request-plus": "^0.1.39",
+    "@sto/sto-charts": "^1.0.23",
+    "@sto/sui-utils": "^0.1.6",
+    "@stofe/sui-jiutian-token-customer": "^0.2.1",
+    "@stofe/sui-patcher": "^0.0.4",
+    "react": "^16.9.0",
+    "react-dom": "^16.9.0"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^15.0.0",
+    "@commitlint/config-conventional": "^15.0.0",
+    "@iceworks/spec": "^1.0.0",
+    "@sto/cat-cli": "^0.4.0",
+    "@sto/standard": "^0.1.8",
+    "@types/react": "^17.0.2",
+    "@types/react-dom": "^17.0.2",
+    "babel-eslint": "^10.1.0",
+    "build-plugin-sto-public-path": "^1.0.0",
+    "build-plugin-sto-react-hmr": "^0.0.1",
+    "eslint": "^7.15.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-import": "^2.19.1",
+    "eslint-plugin-prettier": "^3.4.0",
+    "eslint-plugin-react": "^7.17.0",
+    "eslint-plugin-react-hooks": "^4.0.4",
+    "husky": "^7.0.4",
+    "ice.js": "^2.0.0",
+    "prettier": "^2.4.1",
+    "stylelint": "^13.13.1",
+    "stylelint-scss": "^3.21.0",
+    "typescript": "4.9",
+    "windicss-webpack-plugin": "^1.7.8"
+  },
+  "resolutions": {
+    "dayjs": "1.11.10"
+  }
+}

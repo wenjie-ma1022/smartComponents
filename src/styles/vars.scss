@@ -1,0 +1,93 @@
+/**
+ * vars
+ */
+
+@import "@alifd/theme-sto-small/variables.scss";
+
+// URLS
+$loading_circle: 'https://img.alicdn.com/tps/i3/TB1VG6aHXXXXXXZXpXX2GPaIVXX-80-80.gif'; // 点阵图
+$loading_small: 'https://img.alicdn.com/tps/i2/TB1RGBBJVXXXXXhXpXXBStGGXXX-32-32.gif'; // 小菊花
+$img_loading: 'https://img.alicdn.com/tps/i1/TB1t_9bLpXXXXXWXFXXpJArGXXX-34-34.gif'; // 图片加载
+$module_loading: 'https://img.alicdn.com/tps/i4/T1HcvHXd4nXXb6ROYh-48-48.gif'; // 模块加载
+
+/// Z-INDEX
+$zindex-toast: 10000;
+$zindex-tip: 8000;
+$zindex-modal: 5000;
+$zindex-pop: 1000;
+$zindex-area: 500;
+
+// LAYOUT
+$color-header-bg: #fafafa;
+
+// border
+$color-border-main: #efefef;
+
+// NAV
+$color-navigation-bg: $color-brand1-6;
+$color-navigation-brand: #fff;
+$color-navigation-text: #000;
+$color-navigation-active: rgba(20, 112, 204, 0.3);
+$color-navigation-tape: $color-brand1-9;
+
+// title
+$color-brand-sto-tit: #656464;
+
+/// FONT
+$mono-font: 'Fira Mono', 'Andale Mono', 'Menlo', 'Monaco', 'Consolas',
+  'Courier New', monospace;
+$sans-font: -apple-system, 'PingFang SC', arial, 'Helvetica Neue', helvetica,
+  'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+
+/// COLORS
+
+// 主题色系，切换主题时更改此颜色
+$color-b1-1: $color-brand1-1;
+$color-b1-6: $color-brand1-6;
+$color-b1-9: $color-brand1-9;
+
+// 浅色系，一般用于背景
+$color-n1-1: #fff;
+$color-n1-2: #f2f2f2;
+$color-n1-3: #e6e6e6;
+$color-n1-4: #ccc;
+$color-n1-5: #bababa;
+
+// 深色系，一般用于文字
+$color-n2-1: #000;
+$color-n2-2: #263248;
+$color-n2-3: #4a4a4a;
+$color-n2-4: #576283;
+$color-n2-5: #999;
+$color-n2-6: #a6b3ca;
+
+$color-white: $color-n1-1;
+$color-dark: $color-brand1-9;
+$color-black: $color-n2-1;
+$color-orange: #ff9300;
+$color-red: #ff5040;
+$color-cherry: #d0021b;
+$color-pink: #f58586;
+$color-yellow: #ff0;
+$color-green: #009c00;
+$color-blue: $color-b1-6;
+$color-sky: #00b7d3;
+$color-grass: #a9b8b7;
+
+$color-primary: $color-b1-6;
+$color-info: #2062f9;
+$color-warning: $color-orange;
+$color-danger: $color-red;
+$color-error: $color-red;
+$color-success: $color-green;
+
+$color-border: #e9eff6;
+$color-link: $color-b1-6;
+$color-text-normal: $color-n2-2;
+$color-bg: #f5f5f5;
+$color-bg-line: $color-n1-3;
+
+// # brand
+
+$color-brand-main: $color-link-1;
+$color-brand-main-light: $color-link-1;

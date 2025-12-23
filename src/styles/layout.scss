@@ -1,0 +1,554 @@
+//
+
+@import './vars.scss';
+
+$color-n1-1: #fff;
+$color-n2-2: #333;
+$color-n2-4: #666;
+$color-primary: #ec6800;
+$color-bg: #f4f4f4;
+
+// # layout
+.main_menu {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 99999;
+  overflow: hidden;
+  padding-top: 60px;
+  width: 240px;
+  min-width: auto;
+  height: 100vh;
+  transition: all 0.2s ease-in-out;
+
+  &.collapsed {
+    width: 60px;
+  }
+
+  .spread {
+    position: absolute;
+    bottom: 20px;
+    left: 66px;
+    padding: 10px;
+    color: #fff;
+    width: 14px;
+    transform: translateX(-50%);
+    cursor: pointer;
+  }
+
+  .noWord {
+    position: absolute;
+    bottom: 20px;
+    left: 28px;
+    padding: 10px;
+    color: #fff;
+    width: 14px;
+    transform: translateX(-50%);
+    cursor: pointer;
+  }
+
+  .next-menu-item-inner {
+    .next-menu-item-text {
+      .next-menu-item-text-link:link {
+        color: #fff;
+        font-weight: normal;
+      }
+
+      .next-icon.next-small:before {
+        font-size: 22px;
+      }
+
+      .next-icon-operational_analysis {
+        margin-right: 20px;
+        position: relative;
+        left: -2px;
+      }
+    }
+  }
+}
+
+.next-side-nav {
+  &.next-nav.next-ver {
+    .next-menu-item-inner {
+      font-size: 14px;
+    }
+    .next-nav-item[aria-disabled="true"] {
+      color: #ccc;
+    }
+    .next-menu-sub-menu {
+      .next-menu-item-inner {
+        height: 32px;
+        line-height: 32px;
+        font-size: 12px;
+      }
+      .next-nav-item {
+        color: #666;
+      }
+      .next-nav-item [aria-disabled="true"] {
+        color: #ccc;
+      }
+    }
+    .next-nav-item .next-menu-item .next-selected {
+      color: #ff7100;
+      font-weight: 400;
+    }
+  }
+
+  &.next-nav.next-secondary {
+    .next-nav-item.next-menu-item {
+      &.next-selected {
+        font-weight: 400;
+      }
+    }
+  }
+}
+
+.main_header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 99999;
+  // z-index: 8;
+  width: 100%;
+  padding: 0 60px 0 17px;
+  height: 60px;
+  background: $color-header-bg;
+  border-bottom: 1px solid $color-border-main;
+  box-shadow: 0 1px 5px rgba(#295573, 0.21);
+
+  .brand {
+    font-size: 20px;
+    font-weight: 500;
+    color: $color-brand-sto-tit;
+    text-decoration: none;
+    cursor: pointer;
+
+    img {
+      width: 32px;
+      height: 32px;
+    }
+  }
+
+  .actions {
+    .avatar {
+      background: $color-brand-sto-tit;
+      overflow: hidden;
+      width: 32px;
+      height: 32px;
+      border-radius: 100%;
+
+      img {
+        width: 32px;
+        height: auto;
+      }
+
+      svg {
+        width: 24px;
+        height: auto;
+      }
+    }
+  }
+}
+
+.main_container {
+  position: relative;
+  height: 100%;
+  transition: all 0.2s ease-in-out;
+
+  &.collapsed {
+    margin-left: 60px;
+  }
+
+  &> .container_content {
+    position: relative;
+
+    > div, > section {
+      min-width: 1420px;
+    }
+
+    &.has_nav {
+      > div, > section {
+        min-width: 1420 - 200px;
+      }
+    }
+  }
+}
+
+// # 容器
+// 主页面
+.container {
+  color: #333;
+
+  & > h1 {
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 24px;
+    padding-left: 24px;
+  }
+
+  .box {
+    padding: 20px 0;
+    background: #fff;
+    border-radius: 8px;
+    & > .header {
+      position: relative;
+      padding: 0 20px;
+      margin: -20px 0 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 60px;
+
+      &::after {
+        content: ' ';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 1px;
+        background: #e8e8e8;
+      }
+
+      .tit {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 500;
+      }
+    }
+
+    & > .wrap {
+      position: relative;
+      padding: 0 24px;
+
+      .next-btn-secondary {
+        background: linear-gradient(128deg, #ffb211, #eb6800);
+        color: #fff;
+        border-width: 0;
+      }
+
+      .header .tit {
+        font-size: 18px;
+        font-weight: 600;
+      }
+    }
+
+    & + .box {
+      margin-top: 15px;
+    }
+  }
+
+  .query_box {
+    padding-bottom: 4px;
+  }
+}
+
+.next-menu-group-label .next-nav-group-label {
+  display: none;
+}
+
+.navGroup {
+  display: none;
+}
+
+.main_menu .next-menu-item-inner .next-icon {
+  margin-right: 5px;
+}
+
+.next-overlay-inner {
+  overflow: auto;
+}
+.table-center-index {
+  overflow: inherit !important;
+}
+.my-hoz-menu {
+  padding: 2px;
+}
+
+.header-menu-container, .my-hoz-menu {
+  color: $color-n2-4;
+  border-radius: 0;
+
+  .next-menu-item {
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 2px;
+      width: 100%;
+      background-color: $color-primary;
+      transition: width 0.3s ease, transform 0.3s ease;
+      transform: scale(0, 1);
+    }
+
+    a {
+      color: $color-n2-4;
+      font-weight: 400;
+
+      &:hover {
+        color: $color-n2-2;
+      }
+    }
+
+    &[data-active="true"] {
+      a {
+        color: $color-primary;
+        font-weight: 600;
+      }
+
+      &::after {
+        transform: scale(1, 1);
+      }
+    }
+  }
+
+  .next-menu-item {
+    padding: 0;
+    border-radius: 0!important;
+    border-top-left-radius: 0!important;
+    border-bottom-left-radius: 0!important;
+
+    &:hover {
+      border-radius: 0!important;
+      border-top-left-radius: 0!important;
+      border-bottom-left-radius: 0!important;
+    }
+  }
+
+  .next-menu-item-inner {
+    height: auto;
+    line-height: 32px;
+    padding: 14px 20px;
+    cursor: pointer;
+    margin-right: 1px;
+    text-align: center;
+  }
+
+  .next-menu-item-inner {
+    font-size: 16px;
+    position: relative;
+  }
+}
+
+:local {
+  .user-role-inner {
+    :global {
+      .next-input.next-medium .next-input-text-field {
+        font-size: 16px;
+      }
+    }
+  }
+
+  .header {
+    display: flex;
+    position: relative;
+    height: 60px;
+    padding: 0 24px;
+    background-color: $color-white;
+    box-shadow: 0 1px 5px fade-out($color: #295573, $amount: 0.8);
+    z-index: 300;
+
+    .brand {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      height: 60px;
+      min-width: 136px;
+      margin-right: 34px;
+      color: #656464;
+      white-space: nowrap;
+      cursor: pointer;
+
+      > i {
+        flex: 0 0 auto;
+        line-height: 1;
+
+        &::before {
+          font-size: 60px;
+          line-height: 60px;
+          width: auto;
+        }
+      }
+
+      > img {
+        flex: 0 0 auto;
+        height: 32px;
+        position: relative;
+        top: -2px;
+      }
+
+      .brand_text {
+        font-size: 20px;
+        font-weight: 600;
+        color: $color-n2-2;
+        // text-shadow: 0 0 0;
+      }
+
+      .brand_split {
+        margin: 0 6px 0 8px;
+        height: 15px;
+        width: 1px;
+        background-color: #666464;
+        position: relative;
+        top: 2px;
+      }
+
+      .brand_sub {
+        position: relative;
+        top: 3px;
+        font-size: 16px;
+        font-weight: 400;
+      }
+    }
+
+    .msg-notice {
+      display: flex;
+      flex: 0 0 auto;
+      align-items: center;
+      justify-content: center;
+      margin: 0 28px;
+    }
+
+    .msg-notice-inner {
+      width: 20px;
+      height: 22px;
+      color: #666;
+      cursor: pointer;
+    }
+
+    .nav {
+      box-shadow: none;
+      border: none;
+      display: flex;
+      flex: 1;
+    }
+
+    .menu {
+      display: flex;
+      flex: 0 0 auto;
+      align-items: center;
+      margin-right: 12px;
+      cursor: pointer;
+    }
+
+    .menu, .nav {
+      > span, > a {
+        line-height: 32px;
+        padding: 14px 16px;
+        cursor: pointer;
+        color: $color-n2-4;
+        margin-right: 1px;
+      }
+    }
+
+    .menu {
+      > span, > a {
+        font-size: 14px;
+
+        &:hover {
+          background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        > img {
+          display: block;
+          border-radius: 50%;
+          max-width: 32px;
+          max-height: 32px;
+        }
+      }
+    }
+  }
+
+  .body {
+    display: flex;
+    height: calc(100% - 60px);
+    overflow: hidden;
+
+    .main {
+      flex: 1 1 0;
+      height: 100%;
+      overflow: auto;
+      @include scrollbar();
+    }
+
+    .next-side-nav {
+      width: 200px;
+      height: 100%;
+    }
+
+    .sidenav {
+      position: relative;
+      flex: 0 0 auto;
+      height: 100%;
+    }
+
+    .side-nav-ico {
+      position: absolute;
+      bottom: 10%;
+      left: 50%;
+      transform: translateX(-50%);
+      cursor: pointer;
+    }
+
+    .nav-ico {
+      color: #666;
+    }
+  }
+} // ----- local scope END -----
+
+.next-table-cell-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.tableCard, .sui-table.sui-table-small {
+  .next-table-cell-wrapper {
+    width: 100%;
+    display: block;
+  }
+
+  .next-table-selection, .next-table-fixed.next-table-lock-left .next-table-header tr td:last-child, .next-table-fixed.next-table-lock-left .next-table-body tr td:last-child {
+    border-right-width: 1px !important;
+  }
+
+  .next-table td, .next-table th, .next-table tr {
+    border-left: none;
+    border-top: none;
+  }
+}
+//chart tips
+.g2-tooltip {
+  position: absolute;
+  visibility: hidden;
+  z-index: 8;
+  transition: visibility 0.2s cubic-bezier(0.23, 1, 0.32, 1) 0s, left 0.4s cubic-bezier(0.23, 1, 0.32, 1) 0s,
+    top 0.4s cubic-bezier(0.23, 1, 0.32, 1) 0s;
+  background-color: rgba(255, 255, 255, 0.8);
+  box-shadow: rgb(174, 174, 174) 0 0 10px;
+  border-radius: 3px;
+  color: rgb(0, 0, 0);
+  font-size: 12px;
+  font-family: "PingFangSC-Regular", "PingFang SC", "微软雅黑", "microsoft yahei";
+  line-height: 20px;
+  padding: 10px 10px 6px;
+  display: none;
+}
+
+.g2-tooltip-title, .g2-tooltip-list-item {
+  margin-bottom: 4px;
+}
+
+.g2-tooltip-marker {
+  background-color: rgb(24, 144, 255);
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 8px;
+}
+
+.g2-tooltip-value {
+  display: inline-block;
+  float: right;
+  margin-left: 30px;
+}
