@@ -8,12 +8,20 @@
  * 4. 自动选用 bar/line，或者手动指定图表类型
  */
 
-import React from 'react';
-import type { MapConfigType, SeriesType } from '@sto/sto-charts/es/line-chart/interface';
-import { LineChart } from '@sto/sto-charts';
-import { buildSmartLineChartConfig } from './algorithms';
-import type { SmartLineChartProps } from './index.d';
-import { createSeriesConfig, buildXAxisConfig, buildYAxisConfig, autoSetSeriesType } from './utils';
+import React from "react";
+import type {
+  MapConfigType,
+  SeriesType,
+} from "@sto/sto-charts/es/line-chart/interface";
+import { LineChart } from "@sto/sto-charts";
+import { buildSmartLineChartConfig } from "./algorithms";
+import type { SmartLineChartProps } from "./index.d";
+import {
+  createSeriesConfig,
+  buildXAxisConfig,
+  buildYAxisConfig,
+  autoSetSeriesType,
+} from "./utils";
 
 export default function SmartLineChart(props: SmartLineChartProps) {
   const {
@@ -31,14 +39,18 @@ export default function SmartLineChart(props: SmartLineChartProps) {
   // 生成智能配置
   const smartMapConfig = React.useMemo<MapConfigType | undefined>(() => {
     if (!xAxisField) {
-      console.error('xAxisField is required in mapConfig or props');
+      console.error("xAxisField is required in mapConfig or props");
       return undefined;
     }
     if (!dataSource?.length) return undefined;
 
     const result = buildSmartLineChartConfig(dataSource, xAxisField);
-    const metricKeys = Object.keys(dataSource[0]).filter((k) => k !== xAxisField);
-    const autoTypeStr = autoSeriesType ? autoSetSeriesType(dataSource, xAxisField) : 'bar';
+    const metricKeys = Object.keys(dataSource[0]).filter(
+      (k) => k !== xAxisField
+    );
+    const autoTypeStr = autoSeriesType
+      ? autoSetSeriesType(dataSource, xAxisField)
+      : "bar";
 
     let series: SeriesType[];
 
@@ -50,9 +62,9 @@ export default function SmartLineChart(props: SmartLineChartProps) {
           autoSeriesType,
           seriesNameMap,
           field: k,
-          defaultType: 'bar',
+          defaultType: "bar",
           autoTypeStr,
-        }),
+        })
       );
     } else {
       // 双轴情况
@@ -65,10 +77,10 @@ export default function SmartLineChart(props: SmartLineChartProps) {
           autoSeriesType,
           seriesNameMap,
           field: k,
-          defaultType: 'bar',
+          defaultType: "bar",
           autoTypeStr,
           yAxisIndex: 0,
-        }),
+        })
       );
       const rightSeries = right.map((k) =>
         createSeriesConfig({
@@ -76,10 +88,10 @@ export default function SmartLineChart(props: SmartLineChartProps) {
           autoSeriesType,
           seriesNameMap,
           field: k,
-          defaultType: 'line',
+          defaultType: "line",
           autoTypeStr,
           yAxisIndex: 1,
-        }),
+        })
       );
       series = [...leftSeries, ...rightSeries];
     }
@@ -101,5 +113,11 @@ export default function SmartLineChart(props: SmartLineChartProps) {
     seriesNameMap,
   ]);
 
-  return <LineChart dataSource={dataSource} mapConfig={smartMapConfig} {...restProps} />;
+  return (
+    <LineChart
+      dataSource={dataSource}
+      mapConfig={smartMapConfig}
+      {...restProps}
+    />
+  );
 }

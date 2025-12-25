@@ -1,4 +1,10 @@
+export interface PieItem {
+  name: string;
+  value: number;
+  isOther?: boolean;
+  emphasisType?: "key" | "outlier";
+}
 export interface SmartPieChartProps {
-  dataSource: any[];
-  mapConfig: any;
+  dataSource: PieItem[];
+  height?: number;
 }
