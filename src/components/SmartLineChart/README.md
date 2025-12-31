@@ -15,13 +15,13 @@
 ### 基础用法
 
 ```tsx
-import SmartLineChart from '@/components/SmartLineChart';
+import SmartLineChart from "@/components/SmartLineChart";
 
 function Demo() {
   const dataSource = [
-    { date: '2024-01', sales: 1000, profit: 200 },
-    { date: '2024-02', sales: 1500, profit: 300 },
-    { date: '2024-03', sales: 1200, profit: 250 },
+    { date: "2024-01", sales: 1000, profit: 200 },
+    { date: "2024-02", sales: 1500, profit: 300 },
+    { date: "2024-03", sales: 1200, profit: 250 },
   ];
 
   return <SmartLineChart dataSource={dataSource} xAxisField="date" />;
@@ -31,13 +31,13 @@ function Demo() {
 ### 自定义 Y 轴配置
 
 ```tsx
-import SmartLineChart from '@/components/SmartLineChart';
+import SmartLineChart from "@/components/SmartLineChart";
 
 function Demo() {
   const dataSource = [
-    { date: '2024-01', sales: 1000, ctr: 0.12 },
-    { date: '2024-02', sales: 1500, ctr: 0.15 },
-    { date: '2024-03', sales: 1200, ctr: 0.13 },
+    { date: "2024-01", sales: 1000, ctr: 0.12 },
+    { date: "2024-02", sales: 1500, ctr: 0.15 },
+    { date: "2024-03", sales: 1200, ctr: 0.13 },
   ];
 
   return (
@@ -45,10 +45,10 @@ function Demo() {
       dataSource={dataSource}
       xAxisField="date"
       yAxisConfig={{
-        leftName: '销售额',
-        rightName: '点击率',
-        leftFormat: '¥',
-        rightFormat: '%',
+        leftName: "销售额",
+        rightName: "点击率",
+        leftFormat: "¥",
+        rightFormat: "%",
         leftRetain: 0,
         rightRetain: 2,
       }}
@@ -60,13 +60,13 @@ function Demo() {
 ### 手动指定图表类型
 
 ```tsx
-import SmartLineChart from '@/components/SmartLineChart';
+import SmartLineChart from "@/components/SmartLineChart";
 
 function Demo() {
   const dataSource = [
-    { date: '2024-01', uv: 1000, pv: 5000, ctr: 0.12 },
-    { date: '2024-02', uv: 1500, pv: 6000, ctr: 0.15 },
-    { date: '2024-03', uv: 1200, pv: 5500, ctr: 0.13 },
+    { date: "2024-01", uv: 1000, pv: 5000, ctr: 0.12 },
+    { date: "2024-02", uv: 1500, pv: 6000, ctr: 0.15 },
+    { date: "2024-03", uv: 1200, pv: 5500, ctr: 0.13 },
   ];
 
   return (
@@ -74,9 +74,9 @@ function Demo() {
       dataSource={dataSource}
       xAxisField="date"
       seriesTypes={{
-        uv: 'bar',
-        pv: 'bar',
-        ctr: 'line',
+        uv: "bar",
+        pv: "bar",
+        ctr: "line",
       }}
       autoSeriesType={false}
     />
@@ -87,13 +87,13 @@ function Demo() {
 ### 完整配置示例
 
 ```tsx
-import SmartLineChart from '@/components/SmartLineChart';
+import SmartLineChart from "@/components/SmartLineChart";
 
 function Demo() {
   const dataSource = [
-    { date: '2024-01', uv: 1000, pv: 5000, ctr: 0.12, cvr: 0.03 },
-    { date: '2024-02', uv: 1500, pv: 6000, ctr: 0.15, cvr: 0.04 },
-    { date: '2024-03', uv: 1200, pv: 5500, ctr: 0.13, cvr: 0.035 },
+    { date: "2024-01", uv: 1000, pv: 5000, ctr: 0.12, cvr: 0.03 },
+    { date: "2024-02", uv: 1500, pv: 6000, ctr: 0.15, cvr: 0.04 },
+    { date: "2024-03", uv: 1200, pv: 5500, ctr: 0.13, cvr: 0.035 },
   ];
 
   return (
@@ -105,16 +105,16 @@ function Demo() {
       tooltipTheme="dark"
       showLabelValue={false}
       yAxisConfig={{
-        leftName: '访问量',
-        rightName: '转化率',
-        rightFormat: '%',
+        leftName: "访问量",
+        rightName: "转化率",
+        rightFormat: "%",
         rightRetain: 2,
       }}
       seriesTypes={{
-        uv: 'bar',
-        pv: 'bar',
-        ctr: 'line',
-        cvr: 'line',
+        uv: "bar",
+        pv: "bar",
+        ctr: "line",
+        cvr: "line",
       }}
     />
   );
@@ -149,7 +149,7 @@ interface YAxisFormatConfig {
 
 ```typescript
 interface SeriesTypeConfig {
-  [field: string]: 'line' | 'bar' | 'scatter';
+  [field: string]: "line" | "bar" | "scatter";
 }
 ```
 

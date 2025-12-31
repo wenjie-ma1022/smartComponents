@@ -10,8 +10,8 @@ import type {
   AssignResult,
   DataSourceItem,
   SmartLineChartConfig,
-} from './algorithms.d';
-import { kMeansPlusPlus } from '@/utils/algorithmsLab/k_means++';
+} from "./algorithms.d";
+import { kMeansPlusPlus } from "@/utils/algorithmsLab/k_means++";
 
 // --------------- 算法经验值，可能需要优化 ---------------
 const MAX_GAP: number = 10; // 最大差距倍数
@@ -34,7 +34,9 @@ function shouldUseDualAxis(metrics: Metrics): boolean {
   //   指标数量小于2，不需要双轴图
   if (keys.length < 2) return false;
 
-  const allNumber = keys.every((k) => metrics[k].values.every((v) => typeof v === 'number'));
+  const allNumber = keys.every((k) =>
+    metrics[k].values.every((v) => typeof v === "number")
+  );
 
   //   指标值不是数字，不需要双轴图
   if (!allNumber) return false;
@@ -42,11 +44,11 @@ function shouldUseDualAxis(metrics: Metrics): boolean {
   //   数值类型判断（比例，绝对值）
   const types = keys.map((name) => {
     const { min, max } = metrics[name].stats;
-    return min >= -1 && max <= 1 ? 'ratio' : 'absolute';
+    return min >= -1 && max <= 1 ? "ratio" : "absolute";
   });
 
-  const hasRatio = types.includes('ratio');
-  const hasAbs = types.includes('absolute');
+  const hasRatio = types.includes("ratio");
+  const hasAbs = types.includes("absolute");
   if (hasRatio && hasAbs) return true;
 
   const maxVals = keys.map((k) => metrics[k].stats.max);
@@ -70,7 +72,7 @@ function assignLeftRight(metrics: Metrics): AssignResult {
 
   // k-means++ 聚类算法，k = 2
   const [left, right] = kMeansPlusPlus(vectors, 2).sort(
-    (a, b) => medianOfGroup(b) - medianOfGroup(a),
+    (a, b) => medianOfGroup(b) - medianOfGroup(a)
   );
 
   return { left, right };
@@ -79,7 +81,7 @@ function assignLeftRight(metrics: Metrics): AssignResult {
 // ----------------- 核心：生成 LineChart mapConfig -----------------
 export function buildSmartLineChartConfig(
   dataSource: DataSourceItem[],
-  xAxisField?: string,
+  xAxisField?: string
 ): SmartLineChartConfig {
   if (!dataSource?.length) return { isDual: false };
 

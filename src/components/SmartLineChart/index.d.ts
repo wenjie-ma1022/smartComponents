@@ -2,8 +2,8 @@ import {
   IProps as LineChartProps,
   MapConfigType,
   YAxisType,
-} from '@sto/sto-charts/es/line-chart/interface';
-import { DataSourceItem } from './algorithms';
+} from "@sto/sto-charts/es/line-chart/interface";
+import { DataSourceItem } from "./algorithms";
 
 /**
  * X轴配置
@@ -28,17 +28,17 @@ export interface YAxisConfig {
  */
 export interface SeriesTypeConfig {
   /** 指定系列类型，优先级最高 */
-  [key: string]: 'line' | 'bar' | 'scatter';
+  [key: string]: "line" | "bar" | "scatter";
   /** 左轴系列类型 */
-  leftSeriesType?: 'line' | 'bar' | 'scatter';
+  leftSeriesType?: "line" | "bar" | "scatter";
   /** 右轴系列类型 */
-  rightSeriesType?: 'line' | 'bar' | 'scatter';
+  rightSeriesType?: "line" | "bar" | "scatter";
 }
 
 /**
  * SmartLineChart 组件属性
  */
-export interface SmartLineChartProps extends Omit<LineChartProps, 'mapConfig'> {
+export interface SmartLineChartProps extends Omit<LineChartProps, "mapConfig"> {
   /** 图表配置 */
   mapConfig?: MapConfigType;
   /** 图表高度，透传 LineChartProps.height */

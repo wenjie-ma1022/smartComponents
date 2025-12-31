@@ -1,23 +1,30 @@
-import type { SeriesType, MapConfigType, YAxisType } from '@sto/sto-charts/es/line-chart/interface';
-import type { SeriesTypeConfig, YAxisConfig, XAxisConfig } from './index.d';
-import type { DataSourceItem } from './algorithms.d';
+import type {
+  SeriesType,
+  MapConfigType,
+  YAxisType,
+} from "@sto/sto-charts/es/line-chart/interface";
+import type { SeriesTypeConfig, YAxisConfig, XAxisConfig } from "./index.d";
+import type { DataSourceItem } from "./algorithms.d";
 
 // 判断是否为日期
 function isDate(value: any): boolean {
-  if (typeof value !== 'string') return false;
+  if (typeof value !== "string") return false;
 
   const timestamp = Date.parse(value);
   return !isNaN(timestamp);
 }
 
 // 自动判断图表类型
-export function autoSetSeriesType(dataSource: DataSourceItem[], xAxisField: string): string {
+export function autoSetSeriesType(
+  dataSource: DataSourceItem[],
+  xAxisField: string
+): string {
   const xAxisValues = dataSource.map((d) => d[xAxisField]);
   const isDateValues = xAxisValues.every((v) => isDate(v));
   if (isDateValues || dataSource.length > 10) {
-    return 'line';
+    return "line";
   }
-  return 'bar';
+  return "bar";
 }
 
 // 确定 series 的类型
@@ -26,14 +33,14 @@ function determineSeriesType(
   autoSeriesType: boolean,
   field: string,
   defaultType: string,
-  autoTypeStr: string,
+  autoTypeStr: string
 ): string {
   // 优先级：字段指定 > 分组指定 > 自动判断 > 默认值
   if (seriesTypes?.[field]) return seriesTypes[field];
-  if (seriesTypes?.leftSeriesType && defaultType === 'bar') {
+  if (seriesTypes?.leftSeriesType && defaultType === "bar") {
     return seriesTypes.leftSeriesType;
   }
-  if (seriesTypes?.rightSeriesType && defaultType === 'line') {
+  if (seriesTypes?.rightSeriesType && defaultType === "line") {
     return seriesTypes.rightSeriesType;
   }
   if (autoSeriesType) return autoTypeStr;
@@ -64,7 +71,13 @@ export function createSeriesConfig(params: {
     yAxisIndex,
   } = params;
 
-  const type = determineSeriesType(seriesTypes, autoSeriesType, field, defaultType, autoTypeStr);
+  const type = determineSeriesType(
+    seriesTypes,
+    autoSeriesType,
+    field,
+    defaultType,
+    autoTypeStr
+  );
   const config: any = {
     field,
     name: seriesNameMap?.[field] || field,
@@ -72,7 +85,7 @@ export function createSeriesConfig(params: {
   };
 
   if (yAxisIndex !== undefined) config.yAxisIndex = yAxisIndex;
-  if (type === 'line') config.smooth = true;
+  if (type === "line") config.smooth = true;
 
   return config;
 }
@@ -87,7 +100,7 @@ export function createSeriesConfig(params: {
 export function buildXAxisConfig(
   mapConfig: MapConfigType | undefined,
   xAxisField: string,
-  xAxisConfig: XAxisConfig | undefined,
+  xAxisConfig: XAxisConfig | undefined
 ) {
   return {
     ...(mapConfig?.xAxis || {}),
@@ -104,17 +117,17 @@ export function buildXAxisConfig(
  */
 export function buildYAxisConfig(
   yAxisConfig: YAxisConfig | undefined,
-  isDual: boolean,
+  isDual: boolean
 ): YAxisType[] {
   const leftConfig: YAxisType = yAxisConfig?.leftConfig || {
-    type: 'value',
-    name: isDual ? '左Y轴' : 'Y轴',
+    type: "value",
+    name: isDual ? "左Y轴" : "Y轴",
   };
 
   if (!isDual) return [leftConfig];
   const rightConfig: YAxisType = yAxisConfig?.rightConfig || {
-    type: 'value',
-    name: '右Y轴',
+    type: "value",
+    name: "右Y轴",
   };
   return [leftConfig, rightConfig];
 }
