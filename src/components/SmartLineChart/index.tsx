@@ -2,8 +2,8 @@
  * SmartLineChart 智能折线/柱状图组件
  *
  * 功能：
- * 1. 自动判断是否需要双轴图，以及左右轴分配数据
- * 2. 自动选用 bar/line，或者手动指定图表类型
+ * 1. 自动判断是否需要双轴图，以及左右轴分配数据(数据特征 + k-means聚类算法)
+ * 2. 自动选用 bar/line，或者手动指定图表类型  TODO:后续可以根据左右轴数据分别推荐
  * 3. 支持自定义 X 轴字段
  * 4. 支持自定义左右 Y 轴名称、格式化
  */
@@ -14,16 +14,15 @@ import type {
   SeriesType,
 } from "@sto/sto-charts/es/line-chart/interface";
 import { LineChart } from "@sto/sto-charts";
-import { buildSmartLineChartConfig } from "./algorithms";
+import { buildSmartLineChartConfig, autoSetSeriesType } from "./algorithms";
 import type { SmartLineChartProps } from "./index.d";
 import {
   createSeriesConfig,
   buildXAxisConfig,
   buildYAxisConfig,
-  autoSetSeriesType,
 } from "./utils";
 
-export default function SmartLineChart(props: SmartLineChartProps) {
+const SmartLineChart: React.FC<SmartLineChartProps> = (props) => {
   const {
     dataSource, // 数据源
     mapConfig,
@@ -32,7 +31,7 @@ export default function SmartLineChart(props: SmartLineChartProps) {
     yAxisConfig, // Y轴配置
     seriesTypes, // 指定各字段的图表类型
     seriesNameMap, // 指定各字段的名称
-    autoSeriesType = true, // 是否自动判断使用 bar/line
+    autoSeriesType = !seriesTypes, // 如果传入了 seriesTypes，使用手动模式；否则使用自动模式
     ...restProps // 其他属性
   } = props;
 
@@ -48,9 +47,11 @@ export default function SmartLineChart(props: SmartLineChartProps) {
     const metricKeys = Object.keys(dataSource[0]).filter(
       (k) => k !== xAxisField
     );
+
+    // 自动判断图表类型
     const autoTypeStr = autoSeriesType
       ? autoSetSeriesType(dataSource, xAxisField)
-      : "bar";
+      : undefined;
 
     let series: SeriesType[];
 
@@ -120,4 +121,6 @@ export default function SmartLineChart(props: SmartLineChartProps) {
       {...restProps}
     />
   );
-}
+};
+
+export default SmartLineChart;

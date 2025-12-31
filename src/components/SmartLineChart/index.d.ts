@@ -1,3 +1,4 @@
+import React from "react";
 import {
   IProps as LineChartProps,
   MapConfigType,
@@ -28,11 +29,13 @@ export interface YAxisConfig {
  */
 export interface SeriesTypeConfig {
   /** 指定系列类型，优先级最高 */
-  [key: string]: "line" | "bar" | "scatter";
+  [key: string]: "line" | "bar";
   /** 左轴系列类型 */
-  leftSeriesType?: "line" | "bar" | "scatter";
+  leftSeriesType?: "line" | "bar";
   /** 右轴系列类型 */
-  rightSeriesType?: "line" | "bar" | "scatter";
+  rightSeriesType?: "line" | "bar";
+  /** 指定所有系列类型，优先级最低 */
+  seriesType?: "line" | "bar";
 }
 
 /**
@@ -53,10 +56,15 @@ export interface SmartLineChartProps extends Omit<LineChartProps, "mapConfig"> {
   xAxisConfig?: XAxisConfig;
   /** Y轴格式化配置 */
   yAxisConfig?: YAxisConfig;
-  /** 指定各字段的图表类型（'line' | 'bar' | 'scatter'） */
+  /** 指定各字段的图表类型（'line' | 'bar'） */
   seriesTypes?: SeriesTypeConfig;
   /** 指定各字段的名称 */
   seriesNameMap?: { [key: string]: string };
   /** 是否自动判断使用 bar/line，默认 true */
   autoSeriesType?: boolean;
 }
+
+/**
+ * SmartLineChart 组件
+ */
+export declare const SmartLineChart: React.FC<SmartLineChartProps>;

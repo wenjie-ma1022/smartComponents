@@ -4,28 +4,6 @@ import type {
   YAxisType,
 } from "@sto/sto-charts/es/line-chart/interface";
 import type { SeriesTypeConfig, YAxisConfig, XAxisConfig } from "./index.d";
-import type { DataSourceItem } from "./algorithms.d";
-
-// 判断是否为日期
-function isDate(value: any): boolean {
-  if (typeof value !== "string") return false;
-
-  const timestamp = Date.parse(value);
-  return !isNaN(timestamp);
-}
-
-// 自动判断图表类型
-export function autoSetSeriesType(
-  dataSource: DataSourceItem[],
-  xAxisField: string
-): string {
-  const xAxisValues = dataSource.map((d) => d[xAxisField]);
-  const isDateValues = xAxisValues.every((v) => isDate(v));
-  if (isDateValues || dataSource.length > 10) {
-    return "line";
-  }
-  return "bar";
-}
 
 // 确定 series 的类型
 function determineSeriesType(
@@ -33,7 +11,7 @@ function determineSeriesType(
   autoSeriesType: boolean,
   field: string,
   defaultType: string,
-  autoTypeStr: string
+  autoTypeStr: string | undefined
 ): string {
   // 优先级：字段指定 > 分组指定 > 自动判断 > 默认值
   if (seriesTypes?.[field]) return seriesTypes[field];
@@ -43,7 +21,7 @@ function determineSeriesType(
   if (seriesTypes?.rightSeriesType && defaultType === "line") {
     return seriesTypes.rightSeriesType;
   }
-  if (autoSeriesType) return autoTypeStr;
+  if (autoSeriesType && autoTypeStr) return autoTypeStr;
   return defaultType;
 }
 
@@ -58,7 +36,7 @@ export function createSeriesConfig(params: {
   seriesNameMap: { [key: string]: string } | undefined;
   field: string;
   defaultType: string;
-  autoTypeStr: string;
+  autoTypeStr: string | undefined;
   yAxisIndex?: number;
 }): SeriesType {
   const {
