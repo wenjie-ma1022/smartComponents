@@ -4,7 +4,7 @@ import { mockComplexData } from "./const";
 import SmartLineChart from "@/components/SmartLineChart";
 
 const SmartLineChartMockDataDemo: React.FC = () => {
-  const [selectedFields, setSelectedFields] = useState(["uv", "pv"]);
+  const [selectedFields, setSelectedFields] = useState(["uv"]);
 
   const dataSource = useMemo(() => {
     const newDataSource = mockComplexData.map((item) => {
@@ -44,7 +44,11 @@ const SmartLineChartMockDataDemo: React.FC = () => {
         style={{ width: 400 }}
       />
 
-      {/* <SmartLineChart
+      {/* 最小配置示例 */}
+      <SmartLineChart dataSource={dataSource} xAxisField="date" height={500} />
+
+      {/* 完整配置示例 */}
+      <SmartLineChart
         dataSource={dataSource}
         xAxisField="date"
         height={500}
@@ -75,39 +79,6 @@ const SmartLineChartMockDataDemo: React.FC = () => {
           cvr: "转化率",
           roi: "投资回报率",
         }}
-      /> */}
-
-      <SmartLineChart
-        dataSource={dataSource}
-        xAxisField="date"
-        height={500}
-        // hideCheckbox
-        // tooltipTheme="dark"
-        // showLabelValue={false}
-        // xAxisConfig={{
-        //   name: "日期",
-        //   format: "date:MM-DD",
-        // }}
-        // yAxisConfig={{
-        //   leftConfig: {
-        //     name: "访问量/浏览量",
-        //     type: "value",
-        //     format: "number-w:0",
-        //   },
-        //   rightConfig: {
-        //     name: "转化率/回报率(%)",
-        //     type: "value",
-        //     retain: 2,
-        //     format: "percent:2",
-        //   },
-        // }}
-        // seriesNameMap={{
-        //   uv: "用户访问量",
-        //   pv: "页面浏览量",
-        //   ctr: "点击率",
-        //   cvr: "转化率",
-        //   roi: "投资回报率",
-        // }}
       />
     </CnPage>
   );
