@@ -4,6 +4,7 @@ import type {
   YAxisType,
 } from "@sto/sto-charts/es/line-chart/interface";
 import type { SeriesTypeConfig, YAxisConfig, XAxisConfig } from "./index.d";
+import type { DataSourceItem } from "./algorithms.d";
 
 // 确定 series 的类型
 function determineSeriesType(
@@ -24,6 +25,26 @@ function determineSeriesType(
   if (autoSeriesType && autoTypeStr) return autoTypeStr;
   return defaultType;
 }
+
+// 获取过滤后的数据源
+export const getFilteredDataSource = (
+  dataSource: DataSourceItem[],
+  xAxisField: string,
+  fields: string[]
+): DataSourceItem[] => {
+  return dataSource.map((d) => {
+    const filteredData: any = {
+      [xAxisField]: d[xAxisField], // x轴字段必须保留
+    };
+    // 只保留属于左轴的字段
+    fields.forEach((field) => {
+      if (d.hasOwnProperty(field)) {
+        filteredData[field] = d[field];
+      }
+    });
+    return filteredData;
+  });
+};
 
 /**
  *

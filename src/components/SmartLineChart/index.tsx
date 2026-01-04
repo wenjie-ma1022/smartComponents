@@ -3,7 +3,7 @@
  *
  * 功能：
  * 1. 自动判断是否需要双轴图，以及左右轴分配数据(数据特征 + k-means聚类算法)
- * 2. 自动选用 bar/line，或者手动指定图表类型  TODO:后续可以根据左右轴数据分别推荐
+ * 2. 自动选用 bar/line，或者手动指定图表类型，可以根据左右轴数据分别推荐
  * 3. 支持自定义 X 轴字段
  * 4. 支持自定义左右 Y 轴名称、格式化
  */
@@ -20,6 +20,7 @@ import {
   createSeriesConfig,
   buildXAxisConfig,
   buildYAxisConfig,
+  getFilteredDataSource,
 } from "./utils";
 
 const SmartLineChart: React.FC<SmartLineChartProps> = (props) => {
@@ -48,15 +49,15 @@ const SmartLineChart: React.FC<SmartLineChartProps> = (props) => {
       (k) => k !== xAxisField
     );
 
-    // 自动判断图表类型
-    const autoTypeStr = autoSeriesType
-      ? autoSetSeriesType(dataSource, xAxisField)
-      : undefined;
-
     let series: SeriesType[];
 
     // 单轴情况
     if (!result.isDual) {
+      // 自动判断图表类型
+      const autoTypeStr = autoSeriesType
+        ? autoSetSeriesType(dataSource, xAxisField)
+        : undefined;
+
       series = metricKeys.map((k) =>
         createSeriesConfig({
           seriesTypes,
@@ -72,6 +73,27 @@ const SmartLineChart: React.FC<SmartLineChartProps> = (props) => {
       if (!result.category) return undefined;
       const { left, right } = result.category;
 
+      const leftDataSource = getFilteredDataSource(
+        dataSource,
+        xAxisField,
+        left
+      );
+
+      const rightDataSource = getFilteredDataSource(
+        dataSource,
+        xAxisField,
+        right
+      );
+
+      // 自动判断图表类型
+      const leftAutoTypeStr = autoSeriesType
+        ? autoSetSeriesType(leftDataSource, xAxisField)
+        : undefined;
+
+      const rightAutoTypeStr = autoSeriesType
+        ? autoSetSeriesType(rightDataSource, xAxisField)
+        : undefined;
+
       const leftSeries = left.map((k) =>
         createSeriesConfig({
           seriesTypes,
@@ -79,7 +101,7 @@ const SmartLineChart: React.FC<SmartLineChartProps> = (props) => {
           seriesNameMap,
           field: k,
           defaultType: "bar",
-          autoTypeStr,
+          autoTypeStr: leftAutoTypeStr,
           yAxisIndex: 0,
         })
       );
@@ -90,7 +112,7 @@ const SmartLineChart: React.FC<SmartLineChartProps> = (props) => {
           seriesNameMap,
           field: k,
           defaultType: "line",
-          autoTypeStr,
+          autoTypeStr: rightAutoTypeStr,
           yAxisIndex: 1,
         })
       );
