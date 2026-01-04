@@ -14,7 +14,7 @@ import type {
   SeriesType,
 } from "@sto/sto-charts/es/line-chart/interface";
 import { LineChart } from "@sto/sto-charts";
-import { buildSmartLineChartConfig, autoSetSeriesType } from "./algorithms";
+import { autoAssignDualAxis, autoSetSeriesType } from "./algorithms";
 import type { SmartLineChartProps } from "./index.d";
 import {
   createSeriesConfig,
@@ -44,7 +44,9 @@ const SmartLineChart: React.FC<SmartLineChartProps> = (props) => {
     }
     if (!dataSource?.length) return undefined;
 
-    const result = buildSmartLineChartConfig(dataSource, xAxisField);
+    // 双轴推荐和聚类结果
+    const result = autoAssignDualAxis(dataSource, xAxisField);
+
     const metricKeys = Object.keys(dataSource[0]).filter(
       (k) => k !== xAxisField
     );

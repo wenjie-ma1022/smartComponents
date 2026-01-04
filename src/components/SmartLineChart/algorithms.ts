@@ -116,8 +116,8 @@ function assignLeftRight(metrics: Metrics): AssignResult {
   return { left, right };
 }
 
-// ----------------- 核心：生成 LineChart mapConfig -----------------
-export function buildSmartLineChartConfig(
+// ----------------- 核心：是否需要双轴，以及左右轴分配数据  -----------------
+function autoAssignDualAxis(
   dataSource: DataSourceItem[],
   xAxisField?: string
 ): SmartLineChartConfig {
@@ -165,7 +165,7 @@ export function buildSmartLineChartConfig(
  * 判断一个值是否可以视为日期
  * 支持 Date 实例 / 可被 Date.parse 解析的字符串
  */
-export function isDate(value: any): boolean {
+function isDate(value: any): boolean {
   if (value instanceof Date && !isNaN(value.getTime())) {
     return true;
   }
@@ -395,7 +395,7 @@ function extractYSeries(
  * 4. 通过「趋势投票比例」决定最终类型
  */
 
-export function autoSetSeriesType(
+function autoSetSeriesType(
   dataSource: DataSourceItem[],
   xAxisField: string
 ): SeriesType {
@@ -489,3 +489,6 @@ export function autoSetSeriesType(
 
   return "bar";
 }
+
+// 导出算法
+export { autoAssignDualAxis, autoSetSeriesType };
