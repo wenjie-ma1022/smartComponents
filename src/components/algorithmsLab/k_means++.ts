@@ -6,25 +6,28 @@
 /**
  * 向量集合接口（用于 K-means 聚类）
  */
-interface Vectors {
+export interface Vectors {
   [key: string]: number[];
 }
 
 /**
  * K-means++ 算法配置选项
  */
-interface KMeansOptions {
+export interface KMeansOptions {
   /** 最大迭代次数，默认 100 */
   maxIterations?: number;
   /** 收敛阈值，默认 0.001 */
   convergenceThreshold?: number;
   /** 是否输出调试信息，默认 false */
   debug?: boolean;
+  /** 初始化重试次数（取最优），默认 10 */
+  initRetries?: number;
 }
 
 // --------------- 默认配置参数 ---------------
 const DEFAULT_MAX_ITERATIONS = 100;
 const DEFAULT_CONVERGENCE_THRESHOLD = 0.001;
+const DEFAULT_INIT_RETRIES = 10; // 初始化重试次数
 const EPSILON = 1e-10; // 浮点数比较阈值
 
 // --------------- 工具函数：计算两个点之间的欧几里得距离平方 --------------------------
@@ -46,11 +49,16 @@ function distSquared(a: number[], b: number[]): number {
 
 /**
  * 计算两个向量之间的欧几里得距离
- * 仅在需要实际距离值时使用（如收敛判断）
+ * 导出供外部使用
  */
-function dist(a: number[], b: number[]): number {
+export function dist(a: number[], b: number[]): number {
   return Math.sqrt(distSquared(a, b));
 }
+
+/**
+ * 导出距离平方函数供外部使用
+ */
+export { distSquared };
 
 // --------------- 工具函数：计算簇的中心点（平均值） --------------------------
 function computeCentroid(groupKeys: string[], vectors: Vectors): number[] {
@@ -78,17 +86,25 @@ function computeCentroid(groupKeys: string[], vectors: Vectors): number[] {
 
 // --------------- K-means++ 初始化：辅助函数 --------------------------
 /**
- * 计算每个点到最近中心点的距离平方
- * 标准 k-means++ 使用 D(x)² 作为概率权重
+ * 计算每个点到最近中心点的距离平方（排除已选索引）
+ * 返回距离数组和候选索引列表
  */
-function computeMinDistancesSquared(
+function computeMinDistancesWithExclusion(
   vec: number[][],
-  centers: number[][]
-): { distances: number[]; sum: number } {
-  const distances: number[] = [];
+  centers: number[][],
+  selectedIndices: Set<number>
+): { distances: number[]; sum: number; candidateIndices: number[] } {
+  const distances: number[] = new Array(vec.length).fill(0);
+  const candidateIndices: number[] = [];
   let sum = 0;
 
   for (let i = 0; i < vec.length; i++) {
+    // 跳过已选择的点
+    if (selectedIndices.has(i)) {
+      distances[i] = 0;
+      continue;
+    }
+
     let minDistSq = Infinity;
     for (const center of centers) {
       const d = distSquared(vec[i], center);
@@ -96,86 +112,185 @@ function computeMinDistancesSquared(
         minDistSq = d;
       }
     }
-    distances.push(minDistSq);
-    sum += minDistSq;
+
+    // 只有距离大于阈值的点才作为候选
+    if (minDistSq > EPSILON) {
+      distances[i] = minDistSq;
+      sum += minDistSq;
+      candidateIndices.push(i);
+    } else {
+      distances[i] = 0;
+    }
   }
 
-  return { distances, sum };
+  return { distances, sum, candidateIndices };
 }
 
 /**
  * 使用 D(x)² 加权概率选择下一个中心点
- * 标准 k-means++ 核心：概率与距离平方成正比
+ * 改进版：追踪已选索引，避免重复选择
  */
-function selectNextCenter(
-  vec: number[][],
+function selectNextCenterIndex(
   distances: number[],
   sumDistances: number,
-  centers: number[][]
-): number[] {
-  // 边界情况：所有点都是已选中心点（距离和为0）
-  if (sumDistances < EPSILON) {
-    // 选择一个未被选中的点
-    const availableIndices = vec
-      .map((_, idx) => idx)
-      .filter(
-        (idx) =>
-          !centers.some((center) => distSquared(vec[idx], center) < EPSILON)
-      );
-
-    const idx =
-      availableIndices.length > 0
-        ? availableIndices[Math.floor(Math.random() * availableIndices.length)]
-        : Math.floor(Math.random() * vec.length);
-
-    return [...vec[idx]];
+  candidateIndices: number[]
+): number {
+  // 边界情况：没有有效候选点
+  if (candidateIndices.length === 0 || sumDistances < EPSILON) {
+    return -1;
   }
 
   // 轮盘赌选择：概率与 D(x)² 成正比
   const random = Math.random() * sumDistances;
   let cumulative = 0;
-  let selectedIndex = vec.length - 1; // 默认选最后一个（防止浮点误差）
 
-  for (let i = 0; i < vec.length; i++) {
-    cumulative += distances[i];
+  for (const idx of candidateIndices) {
+    cumulative += distances[idx];
     if (cumulative >= random) {
-      selectedIndex = i;
-      break;
+      return idx;
     }
   }
 
-  return [...vec[selectedIndex]];
+  // 防止浮点误差，返回最后一个候选
+  return candidateIndices[candidateIndices.length - 1];
 }
 
 /**
- * K-means++ 初始化算法
+ * 计算初始化质量（簇内距离平方和的负数，越大越好）
+ */
+function computeInitQuality(vec: number[][], centers: number[][]): number {
+  let totalDistSq = 0;
+  for (const v of vec) {
+    let minDistSq = Infinity;
+    for (const center of centers) {
+      const d = distSquared(v, center);
+      if (d < minDistSq) {
+        minDistSq = d;
+      }
+    }
+    totalDistSq += minDistSq;
+  }
+  // 返回负数，因为我们要最大化（即最小化距离和）
+  return -totalDistSq;
+}
+
+/**
+ * 单次 K-means++ 初始化
  * @param vec 向量数组
  * @param k 聚类数量
- * @returns 初始中心点数组
+ * @returns 初始中心点数组和对应的索引
  */
-function initializeCenters(vec: number[][], k: number): number[][] {
+function initializeCentersOnce(
+  vec: number[][],
+  k: number
+): { centers: number[][]; indices: number[] } {
+  const n = vec.length;
+
+  if (n === 0 || k <= 0) {
+    return { centers: [], indices: [] };
+  }
+
+  // 如果 k >= n，每个点都是中心
+  if (k >= n) {
+    return {
+      centers: vec.map((v) => [...v]),
+      indices: vec.map((_, i) => i),
+    };
+  }
+
+  const centers: number[][] = [];
+  const selectedIndices = new Set<number>();
+
+  // 1. 随机选择第一个中心点
+  const firstIndex = Math.floor(Math.random() * n);
+  centers.push([...vec[firstIndex]]);
+  selectedIndices.add(firstIndex);
+
+  // 2. 使用 D(x)² 加权概率选择剩余的 k-1 个中心点
+  for (let c = 1; c < k; c++) {
+    const { distances, sum, candidateIndices } =
+      computeMinDistancesWithExclusion(vec, centers, selectedIndices);
+
+    const nextIndex = selectNextCenterIndex(distances, sum, candidateIndices);
+
+    if (nextIndex === -1) {
+      // 无法找到更多不同的中心点，提前终止
+      break;
+    }
+
+    centers.push([...vec[nextIndex]]);
+    selectedIndices.add(nextIndex);
+  }
+
+  return { centers, indices: Array.from(selectedIndices) };
+}
+
+/**
+ * K-means++ 初始化算法（带重试机制）
+ * 多次运行初始化，选择质量最好的一组中心点
+ * @param vec 向量数组
+ * @param k 聚类数量
+ * @param retries 重试次数
+ * @returns 最优初始中心点数组
+ */
+function initializeCenters(
+  vec: number[][],
+  k: number,
+  retries: number = DEFAULT_INIT_RETRIES
+): number[][] {
   const n = vec.length;
 
   if (n === 0 || k <= 0) {
     return [];
   }
 
-  // 如果 k >= n，每个点都是中心
+  // 如果 k >= n，每个点都是中心，无需重试
   if (k >= n) {
     return vec.map((v) => [...v]);
   }
 
+  // 小数据集时适当增加重试次数
+  const actualRetries = n <= 10 ? Math.max(retries, 20) : retries;
+
+  let bestCenters: number[][] = [];
+  let bestQuality = -Infinity;
+
+  for (let r = 0; r < actualRetries; r++) {
+    const { centers } = initializeCentersOnce(vec, k);
+
+    // 确保获得了足够的中心点
+    if (centers.length < k) {
+      continue;
+    }
+
+    const quality = computeInitQuality(vec, centers);
+
+    if (quality > bestQuality) {
+      bestQuality = quality;
+      bestCenters = centers;
+    }
+  }
+
+  // 如果所有重试都失败，退化到简单的均匀选择
+  if (bestCenters.length === 0) {
+    bestCenters = selectCentersUniformly(vec, k);
+  }
+
+  return bestCenters;
+}
+
+/**
+ * 均匀选择中心点（退化方案）
+ * 当 k-means++ 无法正常工作时使用
+ */
+function selectCentersUniformly(vec: number[][], k: number): number[][] {
+  const n = vec.length;
+  const step = n / k;
   const centers: number[][] = [];
 
-  // 1. 随机选择第一个中心点
-  const firstIndex = Math.floor(Math.random() * n);
-  centers.push([...vec[firstIndex]]);
-
-  // 2. 使用 D(x)² 加权概率选择剩余的 k-1 个中心点
-  for (let c = 1; c < k; c++) {
-    const { distances, sum } = computeMinDistancesSquared(vec, centers);
-    const nextCenter = selectNextCenter(vec, distances, sum, centers);
-    centers.push(nextCenter);
+  for (let i = 0; i < k; i++) {
+    const idx = Math.min(Math.floor(i * step), n - 1);
+    centers.push([...vec[idx]]);
   }
 
   return centers;
@@ -183,15 +298,28 @@ function initializeCenters(vec: number[][], k: number): number[][] {
 
 // --------------- K-means++ 核心算法：辅助函数 --------------------------
 /**
- * 将所有点分配到最近的簇
+ * 比较两个数组是否相等（用于早期终止检测）
  */
-function assignPointsToClusters(
+function arraysEqual(a: number[], b: number[]): boolean {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
+}
+
+/**
+ * 将所有点分配到最近的簇（带分配追踪）
+ * 返回簇和分配数组，用于早期终止检测
+ */
+function assignPointsToClustersWithTracking(
   keys: string[],
   vec: number[][],
   centers: number[][],
   clusterCount: number
-): string[][] {
+): { clusters: string[][]; assignment: number[] } {
   const clusters: string[][] = Array.from({ length: clusterCount }, () => []);
+  const assignment: number[] = new Array(vec.length);
 
   for (let idx = 0; idx < vec.length; idx++) {
     const v = vec[idx];
@@ -199,7 +327,7 @@ function assignPointsToClusters(
     let clusterIndex = 0;
 
     for (let c = 0; c < clusterCount; c++) {
-      const d = distSquared(v, centers[c]); // 使用距离平方比较
+      const d = distSquared(v, centers[c]);
       if (d < minDistSq) {
         minDistSq = d;
         clusterIndex = c;
@@ -207,9 +335,10 @@ function assignPointsToClusters(
     }
 
     clusters[clusterIndex].push(keys[idx]);
+    assignment[idx] = clusterIndex;
   }
 
-  return clusters;
+  return { clusters, assignment };
 }
 
 /**
@@ -220,7 +349,6 @@ function updateCenters(
   clusters: string[][],
   vectors: Vectors,
   vec: number[][],
-  keys: string[],
   oldCenters: number[][]
 ): number[][] {
   return clusters.map((cluster, idx) => {
@@ -229,7 +357,7 @@ function updateCenters(
     }
 
     // 空簇处理：选择距离所有现有中心最远的点
-    let maxMinDist = -1;
+    let maxMinDist = -Infinity; // 修复：使用 -Infinity 而非 -1
     let farthestIndex = 0;
 
     for (let i = 0; i < vec.length; i++) {
@@ -253,15 +381,15 @@ function updateCenters(
 }
 
 /**
- * 检查中心点是否收敛
+ * 检查中心点是否收敛（使用距离平方避免 sqrt）
  */
 function hasConverged(
   newCenters: number[][],
   oldCenters: number[][],
-  threshold: number
+  thresholdSquared: number
 ): boolean {
   for (let c = 0; c < newCenters.length; c++) {
-    if (dist(newCenters[c], oldCenters[c]) > threshold) {
+    if (distSquared(newCenters[c], oldCenters[c]) > thresholdSquared) {
       return false;
     }
   }
@@ -284,6 +412,7 @@ export function kMeansPlusPlus(
     maxIterations = DEFAULT_MAX_ITERATIONS,
     convergenceThreshold = DEFAULT_CONVERGENCE_THRESHOLD,
     debug = false,
+    initRetries = DEFAULT_INIT_RETRIES,
   } = options;
 
   const keys = Object.keys(vectors);
@@ -307,24 +436,37 @@ export function kMeansPlusPlus(
     return keys.map((key) => [key]);
   }
 
-  // K-means++ 初始化
-  let centers = initializeCenters(vec, clusterCount);
+  // K-means++ 初始化（带重试机制）
+  let centers = initializeCenters(vec, clusterCount, initRetries);
   let iter = 0;
   let converged = false;
   let clusters: string[][] = [];
+  let prevAssignment: number[] = []; // 用于早期终止检测
+
+  // 预计算阈值平方（避免每次迭代都计算）
+  const thresholdSquared = convergenceThreshold * convergenceThreshold;
 
   // 迭代优化
   while (!converged && iter < maxIterations) {
     iter++;
 
     // E步：分配点到最近的簇
-    clusters = assignPointsToClusters(keys, vec, centers, clusterCount);
+    const { clusters: newClusters, assignment } =
+      assignPointsToClustersWithTracking(keys, vec, centers, clusterCount);
+    clusters = newClusters;
+
+    // 早期终止：如果分配没有变化，直接收敛
+    if (iter > 1 && arraysEqual(assignment, prevAssignment)) {
+      converged = true;
+      break;
+    }
+    prevAssignment = assignment;
 
     // M步：更新中心点
-    const newCenters = updateCenters(clusters, vectors, vec, keys, centers);
+    const newCenters = updateCenters(clusters, vectors, vec, centers);
 
-    // 检查收敛
-    converged = hasConverged(newCenters, centers, convergenceThreshold);
+    // 检查收敛（中心点移动距离）
+    converged = hasConverged(newCenters, centers, thresholdSquared);
     centers = newCenters;
   }
 
@@ -339,49 +481,77 @@ export function kMeansPlusPlus(
 /**
  * 计算聚类结果的轮廓系数（Silhouette Coefficient）
  * 用于评估聚类质量，范围 [-1, 1]，越大越好
+ *
+ * 性能优化：
+ * - 大数据集（>1000点）自动采样计算
+ * - 使用距离平方避免 sqrt（最后统一开方）
+ *
+ * @param vectors 向量集合
+ * @param clusters 聚类结果
+ * @param maxSamples 最大采样数量，默认 500
  */
 export function computeSilhouetteScore(
   vectors: Vectors,
-  clusters: string[][]
+  clusters: string[][],
+  maxSamples: number = 500
 ): number {
   const keys = Object.keys(vectors);
-  if (keys.length <= 1 || clusters.length <= 1) {
+  const n = keys.length;
+
+  if (n <= 1 || clusters.length <= 1) {
+    return 0;
+  }
+
+  // 过滤空簇
+  const nonEmptyClusters = clusters.filter((c) => c.length > 0);
+  if (nonEmptyClusters.length <= 1) {
     return 0;
   }
 
   // 建立点到簇的映射
   const pointToCluster = new Map<string, number>();
-  clusters.forEach((cluster, idx) => {
+  nonEmptyClusters.forEach((cluster, idx) => {
     cluster.forEach((key) => pointToCluster.set(key, idx));
   });
+
+  // 大数据集采样
+  let sampleKeys = keys;
+  if (n > maxSamples) {
+    sampleKeys = shuffleArray(keys).slice(0, maxSamples);
+  }
 
   let totalScore = 0;
   let count = 0;
 
-  for (const key of keys) {
-    const clusterIdx = pointToCluster.get(key)!;
-    const cluster = clusters[clusterIdx];
+  for (const key of sampleKeys) {
+    const clusterIdx = pointToCluster.get(key);
+    if (clusterIdx === undefined) continue;
+
+    const cluster = nonEmptyClusters[clusterIdx];
+    const vec = vectors[key];
 
     // 计算 a(i): 点到同簇其他点的平均距离
     let a = 0;
     if (cluster.length > 1) {
+      let sumDist = 0;
       for (const otherKey of cluster) {
         if (otherKey !== key) {
-          a += dist(vectors[key], vectors[otherKey]);
+          sumDist += Math.sqrt(distSquared(vec, vectors[otherKey]));
         }
       }
-      a /= cluster.length - 1;
+      a = sumDist / (cluster.length - 1);
     }
 
     // 计算 b(i): 点到最近其他簇的平均距离
     let b = Infinity;
-    for (let c = 0; c < clusters.length; c++) {
-      if (c !== clusterIdx && clusters[c].length > 0) {
-        let avgDist = 0;
-        for (const otherKey of clusters[c]) {
-          avgDist += dist(vectors[key], vectors[otherKey]);
+    for (let c = 0; c < nonEmptyClusters.length; c++) {
+      if (c !== clusterIdx) {
+        const otherCluster = nonEmptyClusters[c];
+        let sumDist = 0;
+        for (const otherKey of otherCluster) {
+          sumDist += Math.sqrt(distSquared(vec, vectors[otherKey]));
         }
-        avgDist /= clusters[c].length;
+        const avgDist = sumDist / otherCluster.length;
         if (avgDist < b) {
           b = avgDist;
         }
@@ -389,7 +559,7 @@ export function computeSilhouetteScore(
     }
 
     // 轮廓系数 s(i) = (b - a) / max(a, b)
-    if (b !== Infinity) {
+    if (b !== Infinity && (a > 0 || b > 0)) {
       const s = (b - a) / Math.max(a, b);
       totalScore += s;
       count++;
@@ -397,4 +567,16 @@ export function computeSilhouetteScore(
   }
 
   return count > 0 ? totalScore / count : 0;
+}
+
+/**
+ * Fisher-Yates 洗牌算法
+ */
+function shuffleArray<T>(array: T[]): T[] {
+  const result = [...array];
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
 }
