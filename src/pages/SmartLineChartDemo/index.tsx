@@ -28,7 +28,6 @@ const SmartLineChartMockDataDemo: React.FC = () => {
           数据包含：用户访问量(UV)、页面浏览量(PV)、点击率(CTR)、转化率(CVR)、投资回报率(ROI)
         </p>
       </div>
-
       <CnCheckboxGroup
         onChange={(value) => {
           setSelectedFields(value ?? []);
@@ -43,12 +42,10 @@ const SmartLineChartMockDataDemo: React.FC = () => {
         ]}
         style={{ width: 400 }}
       />
-
       {/* 最小配置示例 */}
       <SmartLineChart dataSource={dataSource} xAxisField="date" height={500} />
-
       {/* 完整配置示例 */}
-      <SmartLineChart
+      {/* <SmartLineChart
         dataSource={dataSource}
         xAxisField="date"
         height={500}
@@ -79,7 +76,7 @@ const SmartLineChartMockDataDemo: React.FC = () => {
           cvr: "转化率",
           roi: "投资回报率",
         }}
-      />
+      /> */}
     </CnPage>
   );
 };

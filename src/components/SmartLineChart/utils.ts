@@ -3,8 +3,12 @@ import type {
   MapConfigType,
   YAxisType,
 } from "@sto/sto-charts/es/line-chart/interface";
-import type { SeriesTypeConfig, YAxisConfig, XAxisConfig } from "./index.d";
-import type { DataSourceItem } from "./algorithms.d";
+import type {
+  SeriesTypeConfig,
+  YAxisConfig,
+  XAxisConfig,
+  DataSourceItem,
+} from "./index.d";
 
 // 确定 series 的类型
 function determineSeriesType(

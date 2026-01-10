@@ -4,7 +4,15 @@ import {
   MapConfigType,
   YAxisType,
 } from "@sto/sto-charts/es/line-chart/interface";
-import { DataSourceItem } from "./algorithms";
+
+/**
+ * 数据源项接口
+ * 支持任意字段，值可以是字符串、数字、日期或其他类型
+ */
+export interface DataSourceItem {
+  /** 动态字段：包括 X轴字段和其他指标字段 */
+  [key: string]: string | number | Date | any;
+}
 
 /**
  * X轴配置

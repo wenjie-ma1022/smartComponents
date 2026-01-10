@@ -9,12 +9,12 @@
  */
 
 import React from "react";
+import { LineChart } from "@sto/sto-charts";
+import { autoAssignDualAxis, autoSetSeriesType } from "./algorithms/index";
 import type {
   MapConfigType,
   SeriesType,
 } from "@sto/sto-charts/es/line-chart/interface";
-import { LineChart } from "@sto/sto-charts";
-import { autoAssignDualAxis, autoSetSeriesType } from "./algorithms";
 import type { SmartLineChartProps } from "./index.d";
 import {
   createSeriesConfig,
