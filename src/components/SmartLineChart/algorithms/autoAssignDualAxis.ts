@@ -93,17 +93,15 @@ function assignLeftRight(metrics: Metrics): AssignResult {
 
 // ----------------- 核心：是否需要双轴，以及左右轴分配数据  -----------------
 function autoAssignDualAxis(
-  dataSource: DataSourceItem[],
-  xAxisField?: string
+  yAxisKeys: string[],
+  yAxisData: Record<string, number[]>
 ): SmartLineChartConfig {
-  if (!dataSource?.length) return { isDual: false };
-
-  const metricKeys = Object.keys(dataSource[0]).filter((k) => k !== xAxisField);
+  if (!yAxisKeys?.length) return { isDual: false };
 
   // 构造指标统计
   const metrics: Metrics = {};
-  metricKeys.forEach((key) => {
-    const values = dataSource.map((d) => d[key]);
+  yAxisKeys.forEach((key) => {
+    const values = yAxisData[key];
     metrics[key] = {
       values,
       stats: getStats(values),

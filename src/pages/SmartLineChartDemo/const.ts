@@ -247,7 +247,7 @@ export const mockComplexData = [
     uv: 20749,
     pv: 33540,
     ctr: 0.11,
-    cvr: 0.031,
+    cvr: 0.1,
     roi: 0.39,
   },
   {

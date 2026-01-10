@@ -32,18 +32,27 @@ export interface YAxisConfig {
   rightConfig?: YAxisType;
 }
 
+export type SmartLineSeriesType = "bar" | "line";
+
 /**
  * 系列类型配置
  */
 export interface SeriesTypeConfig {
   /** 指定系列类型，优先级最高 */
-  [key: string]: "line" | "bar";
+  [key: string]: SmartLineSeriesType;
   /** 左轴系列类型 */
-  leftSeriesType?: "line" | "bar";
+  leftSeriesType?: SmartLineSeriesType;
   /** 右轴系列类型 */
-  rightSeriesType?: "line" | "bar";
+  rightSeriesType?: SmartLineSeriesType;
   /** 指定所有系列类型，优先级最低 */
-  seriesType?: "line" | "bar";
+  seriesType?: SmartLineSeriesType;
+}
+
+export interface AutoDetectConfig {
+  checkOutliers?: boolean;
+  checkMaxMin?: boolean;
+  checkSharpChange?: boolean;
+  checkTrendDeviation?: boolean;
 }
 
 /**
@@ -70,9 +79,21 @@ export interface SmartLineChartProps extends Omit<LineChartProps, "mapConfig"> {
   seriesNameMap?: { [key: string]: string };
   /** 是否自动判断使用 bar/line，默认 true */
   autoSeriesType?: boolean;
+  /** 自动检测配置 */
+  autoHighlightConfig?: AutoDetectConfig;
 }
 
 /**
  * SmartLineChart 组件
  */
 export declare const SmartLineChart: React.FC<SmartLineChartProps>;
+
+export interface SeriesConfig {
+  seriesTypes: SeriesTypeConfig | undefined;
+  autoSeriesType: boolean;
+  seriesNameMap: { [key: string]: string } | undefined;
+  field: string;
+  defaultType: SmartLineSeriesType;
+  autoTypeStr: SmartLineSeriesType | undefined;
+  yAxisIndex?: number;
+}

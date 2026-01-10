@@ -4,10 +4,12 @@ import type {
   YAxisType,
 } from "@sto/sto-charts/es/line-chart/interface";
 import type {
+  SeriesConfig,
   SeriesTypeConfig,
   YAxisConfig,
   XAxisConfig,
   DataSourceItem,
+  SmartLineSeriesType,
 } from "./index.d";
 
 // 确定 series 的类型
@@ -15,9 +17,9 @@ function determineSeriesType(
   seriesTypes: SeriesTypeConfig | undefined,
   autoSeriesType: boolean,
   field: string,
-  defaultType: string,
-  autoTypeStr: string | undefined
-): string {
+  defaultType: SmartLineSeriesType,
+  autoTypeStr: SmartLineSeriesType | undefined
+): SmartLineSeriesType {
   // 优先级：字段指定 > 分组指定 > 自动判断 > 默认值
   if (seriesTypes?.[field]) return seriesTypes[field];
   if (seriesTypes?.leftSeriesType && defaultType === "bar") {
@@ -55,15 +57,9 @@ export const getFilteredDataSource = (
  * @param params - 创建参数
  * @returns Series 配置对象
  */
-export function createSeriesConfig(params: {
-  seriesTypes: SeriesTypeConfig | undefined;
-  autoSeriesType: boolean;
-  seriesNameMap: { [key: string]: string } | undefined;
-  field: string;
-  defaultType: string;
-  autoTypeStr: string | undefined;
-  yAxisIndex?: number;
-}): SeriesType {
+export function createSeriesConfig(params: SeriesConfig): SeriesType & {
+  type: SmartLineSeriesType;
+} {
   const {
     seriesTypes,
     autoSeriesType,
@@ -81,6 +77,7 @@ export function createSeriesConfig(params: {
     defaultType,
     autoTypeStr
   );
+
   const config: any = {
     field,
     name: seriesNameMap?.[field] || field,

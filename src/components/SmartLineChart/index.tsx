@@ -10,7 +10,11 @@
 
 import React from "react";
 import { LineChart } from "@sto/sto-charts";
-import { autoAssignDualAxis, autoSetSeriesType } from "./algorithms/index";
+import {
+  autoAssignDualAxis,
+  autoSetSeriesType,
+  autoDetectHighlightPoints,
+} from "./algorithms/index";
 import type {
   MapConfigType,
   SeriesType,
@@ -33,6 +37,12 @@ const SmartLineChart: React.FC<SmartLineChartProps> = (props) => {
     seriesTypes, // 指定各字段的图表类型
     seriesNameMap, // 指定各字段的名称
     autoSeriesType = !seriesTypes, // 如果传入了 seriesTypes，使用手动模式；否则使用自动模式
+    autoHighlightConfig = {
+      checkOutliers: true,
+      checkMaxMin: true,
+      checkSharpChange: true,
+      checkTrendDeviation: true,
+    }, // 是否自动检测异常值/关键值
     ...restProps // 其他属性
   } = props;
 
@@ -44,14 +54,24 @@ const SmartLineChart: React.FC<SmartLineChartProps> = (props) => {
     }
     if (!dataSource?.length) return undefined;
 
-    // 双轴推荐和聚类结果
-    const result = autoAssignDualAxis(dataSource, xAxisField);
-
-    const metricKeys = Object.keys(dataSource[0]).filter(
+    const yAxisKeys = Object.keys(dataSource[0]).filter(
       (k) => k !== xAxisField
     );
 
+    if (!yAxisKeys.length) return undefined;
+
+    const yAxisData = yAxisKeys.reduce((acc, key) => {
+      acc[key] = dataSource.map((d) => d[key]);
+      return acc;
+    }, {} as Record<string, number[]>);
+
+    // const highlightPoints = autoDetectHighlightPoints(dataSource, yAxisKeys);
+
+    // 双轴推荐和聚类结果
+    const result = autoAssignDualAxis(yAxisKeys, yAxisData);
+
     let series: SeriesType[];
+    const highlightPoints = {};
 
     // 单轴情况
     if (!result.isDual) {
@@ -60,16 +80,27 @@ const SmartLineChart: React.FC<SmartLineChartProps> = (props) => {
         ? autoSetSeriesType(dataSource, xAxisField)
         : undefined;
 
-      series = metricKeys.map((k) =>
-        createSeriesConfig({
+      series = yAxisKeys.map((k) => {
+        const config = createSeriesConfig({
           seriesTypes,
           autoSeriesType,
           seriesNameMap,
           field: k,
           defaultType: "bar",
           autoTypeStr,
-        })
-      );
+        });
+
+        // 异常值/关键值自动检测
+        const itemHighlightPoints = autoDetectHighlightPoints(
+          yAxisData[k],
+          config.type,
+          autoHighlightConfig
+        );
+        if (itemHighlightPoints?.length > 0) {
+          highlightPoints[k] = itemHighlightPoints;
+        }
+        return config;
+      });
     } else {
       // 双轴情况
       if (!result.category) return undefined;
@@ -96,8 +127,8 @@ const SmartLineChart: React.FC<SmartLineChartProps> = (props) => {
         ? autoSetSeriesType(rightDataSource, xAxisField)
         : undefined;
 
-      const leftSeries = left.map((k) =>
-        createSeriesConfig({
+      const leftSeries = left.map((k) => {
+        const config = createSeriesConfig({
           seriesTypes,
           autoSeriesType,
           seriesNameMap,
@@ -105,10 +136,20 @@ const SmartLineChart: React.FC<SmartLineChartProps> = (props) => {
           defaultType: "bar",
           autoTypeStr: leftAutoTypeStr,
           yAxisIndex: 0,
-        })
-      );
-      const rightSeries = right.map((k) =>
-        createSeriesConfig({
+        });
+        // 异常值/关键值自动检测
+        const itemHighlightPoints = autoDetectHighlightPoints(
+          yAxisData[k],
+          config.type,
+          autoHighlightConfig
+        );
+        if (itemHighlightPoints?.length > 0) {
+          highlightPoints[k] = itemHighlightPoints;
+        }
+        return config;
+      });
+      const rightSeries = right.map((k) => {
+        const config = createSeriesConfig({
           seriesTypes,
           autoSeriesType,
           seriesNameMap,
@@ -116,10 +157,23 @@ const SmartLineChart: React.FC<SmartLineChartProps> = (props) => {
           defaultType: "line",
           autoTypeStr: rightAutoTypeStr,
           yAxisIndex: 1,
-        })
-      );
+        });
+
+        // 异常值/关键值自动检测
+        const itemHighlightPoints = autoDetectHighlightPoints(
+          yAxisData[k],
+          config.type,
+          autoHighlightConfig
+        );
+        if (itemHighlightPoints?.length > 0) {
+          highlightPoints[k] = itemHighlightPoints;
+        }
+        return config;
+      });
       series = [...leftSeries, ...rightSeries];
     }
+
+    console.log("highlightPoints", highlightPoints);
 
     return {
       ...(mapConfig || {}),

@@ -66,8 +66,3 @@ export interface SmartLineChartConfig {
   /** 左右轴分配数据 */
   category?: AssignResult;
 }
-
-/**
- * 图表类型
- */
-export type SeriesType = "bar" | "line";

@@ -8,7 +8,8 @@
  * 4. 通过「趋势投票比例」决定最终类型
  ******************************************************/
 
-import type { DataSourceItem, SeriesType } from "./index.d";
+import type { DataSourceItem } from "./index.d";
+import type { SmartLineSeriesType } from "../index.d";
 
 // --------------- 算法经验值配置（统一管理，便于调优） ---------------
 const TREND_R2_THRESHOLD = 0.6; // 趋势判断：R² 阈值
@@ -273,7 +274,7 @@ function extractYSeries(
 function autoSetSeriesType(
   dataSource: DataSourceItem[],
   xAxisField: string
-): SeriesType {
+): SmartLineSeriesType {
   // ---------- 边界保护 ----------
   if (!Array.isArray(dataSource) || dataSource.length < 3) {
     return "bar";
