@@ -9,7 +9,6 @@ import type {
   Metrics,
   Vectors,
   AssignResult,
-  DataSourceItem,
   SmartLineChartConfig,
 } from "./index.d";
 
