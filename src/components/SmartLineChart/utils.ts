@@ -11,6 +11,97 @@ import type {
   DataSourceItem,
   SmartLineSeriesType,
 } from "./index.d";
+import type { HighlightPoint } from "./algorithms/autoDetectOutliersAndKeys";
+
+/** 高亮点样式配置 */
+const HIGHLIGHT_STYLES = {
+  // 离群值 - 红色警告
+  outlier: {
+    symbol: "circle",
+    symbolSize: 12,
+    itemStyle: {
+      color: "#ff4d4f",
+      borderColor: "#fff",
+      borderWidth: 2,
+      shadowBlur: 4,
+      shadowColor: "rgba(255, 77, 79, 0.4)",
+    },
+    label: {
+      color: "#ff4d4f",
+      fontWeight: "bold" as const,
+    },
+  },
+  // 趋势偏离 - 橙色警告
+  trendDeviation: {
+    symbol: "diamond",
+    symbolSize: 10,
+    itemStyle: {
+      color: "#fa8c16",
+      borderColor: "#fff",
+      borderWidth: 2,
+      shadowBlur: 4,
+      shadowColor: "rgba(250, 140, 22, 0.4)",
+    },
+    label: {
+      color: "#fa8c16",
+      fontWeight: "bold" as const,
+    },
+  },
+  // 关键点（最大/最小/突变）- 蓝色标记
+  keyPoint: {
+    symbol: "pin",
+    symbolSize: 14,
+    itemStyle: {
+      color: "#1890ff",
+      borderColor: "#fff",
+      borderWidth: 2,
+      shadowBlur: 4,
+      shadowColor: "rgba(24, 144, 255, 0.4)",
+    },
+    label: {
+      color: "#1890ff",
+      fontWeight: "bold" as const,
+    },
+  },
+};
+
+/**
+ * 根据 HighlightPoint 数组生成 ECharts markPoint 配置
+ */
+export function buildMarkPointConfig(
+  highlightPoints: HighlightPoint[],
+  dataSource: DataSourceItem[],
+  xAxisField: string
+) {
+  if (!highlightPoints?.length) return undefined;
+
+  const data = highlightPoints.map((point) => {
+    const style = HIGHLIGHT_STYLES[point.type];
+    const xValue = dataSource[point.index]?.[xAxisField];
+
+    return {
+      name: point.reason,
+      coord: [xValue, point.value],
+      value: point.value,
+      ...style,
+      label: {
+        show: true,
+        position: "top" as const,
+        formatter: point.reason,
+        fontSize: 10,
+        padding: [2, 4],
+        backgroundColor: "rgba(255,255,255,0.9)",
+        borderRadius: 2,
+        ...style.label,
+      },
+    };
+  });
+
+  return {
+    animation: true,
+    data,
+  };
+}
 
 // 确定 series 的类型
 function determineSeriesType(

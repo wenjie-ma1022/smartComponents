@@ -25,6 +25,7 @@ import {
   buildXAxisConfig,
   buildYAxisConfig,
   getFilteredDataSource,
+  buildMarkPointConfig,
 } from "./utils";
 
 const SmartLineChart: React.FC<SmartLineChartProps> = (props) => {
@@ -71,7 +72,6 @@ const SmartLineChart: React.FC<SmartLineChartProps> = (props) => {
     const result = autoAssignDualAxis(yAxisKeys, yAxisData);
 
     let series: SeriesType[];
-    const highlightPoints = {};
 
     // 单轴情况
     if (!result.isDual) {
@@ -90,15 +90,23 @@ const SmartLineChart: React.FC<SmartLineChartProps> = (props) => {
           autoTypeStr,
         });
 
-        // 异常值/关键值自动检测
+        // 异常值/关键值自动检测并生成 markPoint
         const itemHighlightPoints = autoDetectHighlightPoints(
           yAxisData[k],
           config.type,
           autoHighlightConfig
         );
-        if (itemHighlightPoints?.length > 0) {
-          highlightPoints[k] = itemHighlightPoints;
+
+        // 添加 markPoint 高亮配置
+        const markPoint = buildMarkPointConfig(
+          itemHighlightPoints,
+          dataSource,
+          xAxisField
+        );
+        if (markPoint) {
+          (config as any).markPoint = markPoint;
         }
+
         return config;
       });
     } else {
@@ -137,17 +145,25 @@ const SmartLineChart: React.FC<SmartLineChartProps> = (props) => {
           autoTypeStr: leftAutoTypeStr,
           yAxisIndex: 0,
         });
-        // 异常值/关键值自动检测
+
+        // 异常值/关键值自动检测并生成 markPoint
         const itemHighlightPoints = autoDetectHighlightPoints(
           yAxisData[k],
           config.type,
           autoHighlightConfig
         );
-        if (itemHighlightPoints?.length > 0) {
-          highlightPoints[k] = itemHighlightPoints;
+        const markPoint = buildMarkPointConfig(
+          itemHighlightPoints,
+          dataSource,
+          xAxisField
+        );
+        if (markPoint) {
+          (config as any).markPoint = markPoint;
         }
+
         return config;
       });
+
       const rightSeries = right.map((k) => {
         const config = createSeriesConfig({
           seriesTypes,
@@ -159,21 +175,28 @@ const SmartLineChart: React.FC<SmartLineChartProps> = (props) => {
           yAxisIndex: 1,
         });
 
-        // 异常值/关键值自动检测
+        // 异常值/关键值自动检测并生成 markPoint
         const itemHighlightPoints = autoDetectHighlightPoints(
           yAxisData[k],
           config.type,
           autoHighlightConfig
         );
-        if (itemHighlightPoints?.length > 0) {
-          highlightPoints[k] = itemHighlightPoints;
+        const markPoint = buildMarkPointConfig(
+          itemHighlightPoints,
+          dataSource,
+          xAxisField
+        );
+        if (markPoint) {
+          (config as any).markPoint = markPoint;
         }
+
         return config;
       });
+
       series = [...leftSeries, ...rightSeries];
     }
 
-    console.log("highlightPoints", highlightPoints);
+    console.log("series:", series);
 
     return {
       ...(mapConfig || {}),
