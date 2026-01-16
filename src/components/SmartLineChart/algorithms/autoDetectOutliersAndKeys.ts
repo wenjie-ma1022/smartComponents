@@ -128,7 +128,7 @@ function detectIqrOutliers(
           index,
           value: v,
           type: "outlier", // 离群值
-          reason: v < lower ? "数值异常偏低 (IQR)" : "数值异常偏高 (IQR)",
+          reason: v < lower ? "数值异常偏低" : "数值异常偏高",
         } as HighlightPoint;
       }
       return null;
