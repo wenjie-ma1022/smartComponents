@@ -57,32 +57,27 @@ function isDate(value: any): boolean {
 
 /**
  * 判断 X 轴是否为「有序数值型」
- * 例如：1,5,7,14 / 202401,202404
+ * 支持递增序列：1,5,7,14 / 202401,202404
+ * 支持递减序列：14,7,5,1 / 202404,202401
  */
 function isOrdinalNumeric(values: any[]): boolean {
-  // 空数组或单元素不视为有序数值
-  if (!values || values.length < 2) {
-    return false;
+  if (!values || values.length < 2) return false;
+
+  // 过滤无效值
+  const cleanValues = values.filter((v) => Number.isFinite(v));
+  if (cleanValues.length < 2) return false;
+
+  let isAscending = true;
+  let isDescending = true;
+
+  for (let i = 1; i < cleanValues.length; i++) {
+    if (cleanValues[i] < cleanValues[i - 1]) isAscending = false;
+    if (cleanValues[i] > cleanValues[i - 1]) isDescending = false;
+    // 如果既不是递增也不是递减，提前退出
+    if (!isAscending && !isDescending) return false;
   }
 
-  // 检查第一个值是否为有效数字（typeof NaN === "number"，需要额外检查）
-  if (!Number.isFinite(values[0])) {
-    return false;
-  }
-
-  // 合并类型检查和有序检查到一个循环
-  for (let i = 1; i < values.length; i++) {
-    // 检查当前值是否为有效数字
-    if (!Number.isFinite(values[i])) {
-      return false;
-    }
-    // 检查是否有序（非递减）
-    if (values[i] < values[i - 1]) {
-      return false;
-    }
-  }
-
-  return true;
+  return isAscending || isDescending;
 }
 
 /**
@@ -110,7 +105,7 @@ function calcLinearTrend(values: number[]) {
   // 异常值检测和过滤（IQR方法 - 优化分位数计算）
   const sortedValues = [...cleanValues].sort((a, b) => a - b);
 
-  // 使用线性插值法计算分位数，更精确
+  // 使用线性插值法计算分位数
   const getQuantile = (sorted: number[], q: number): number => {
     const pos = (sorted.length - 1) * q;
     const lower = Math.floor(pos);
@@ -122,6 +117,7 @@ function calcLinearTrend(values: number[]) {
 
   const q1 = getQuantile(sortedValues, 0.25);
   const q3 = getQuantile(sortedValues, 0.75);
+  // IQR 值域范围
   const iqr = q3 - q1;
 
   // IQR 为 0 时跳过异常值过滤（所有值相近或数据太少）
@@ -141,6 +137,7 @@ function calcLinearTrend(values: number[]) {
     finalValues = cleanValues;
   }
 
+  // 过滤后数据长度
   const finalN = finalValues.length;
   const minY = Math.min(...finalValues);
   const maxY = Math.max(...finalValues);
@@ -171,15 +168,15 @@ function calcLinearTrend(values: number[]) {
     return { slope: 0, r2: 0, confidence: 0, range: 0 };
   }
 
-  // 斜率计算
+  // 线性回归直线的斜率
   const slope = sumXY / sumXX;
 
   // R² 拟合优度计算
   for (let i = 0; i < finalN; i++) {
-    const yHat = slope * (i - xMean) + yMean;
-    const residual = finalValues[i] - yHat;
-    ssTot += (finalValues[i] - yMean) ** 2;
-    ssRes += residual * residual;
+    const yHat = slope * (i - xMean) + yMean; // 预测值
+    const residual = finalValues[i] - yHat; // 残差
+    ssTot += (finalValues[i] - yMean) ** 2; // 总平方和
+    ssRes += residual * residual; // 残差平方和
   }
 
   const r2 = ssTot === 0 ? 0 : Math.max(0, 1 - ssRes / ssTot);
@@ -280,32 +277,39 @@ function autoSetSeriesType(
     return "bar";
   }
 
+  // ---------- Step 1：判断点数 ----------
   const xAxisValues = dataSource.map((d) => d[xAxisField]);
 
-  // ---------- Step 1：X 轴语义判断 ----------
+  // 点数太少，直接使用柱状图
+  if (xAxisValues.length < 4) {
+    return "bar";
+  }
+
+  const ySeriesMap = extractYSeries(dataSource, xAxisField);
+  const seriesNames = Object.keys(ySeriesMap);
+
+  // 没有 Y series，直接使用柱状图
+  if (seriesNames.length === 0) {
+    return "bar";
+  }
+
+  // 点数过多，柱状图会很拥挤，直接使用折线图
+  const totalPoints = xAxisValues.length * seriesNames.length;
+  if (totalPoints > MAX_POINTS_FOR_BAR) {
+    return "line";
+  }
+
+  // ---------- Step 2：X 轴语义判断 ----------
   // 判断是否为日期类型
   const isDateValues = xAxisValues.every((v) => isDate(v));
   // 判断是否为有序数值类型
   const isOrdinal = isOrdinalNumeric(xAxisValues);
+  // 是否为连续类型（日期或有序数值）
   const isContinuousX = isDateValues || isOrdinal;
 
   // X 轴非连续（纯分类） → bar
   if (!isContinuousX) {
     return "bar";
-  }
-
-  // ---------- Step 2：提取所有 Y series ----------
-  const ySeriesMap = extractYSeries(dataSource, xAxisField);
-  const seriesNames = Object.keys(ySeriesMap);
-
-  if (seriesNames.length === 0) {
-    return "bar";
-  }
-
-  // 点数过多时柱状图会很拥挤，直接使用折线图
-  const totalPoints = xAxisValues.length * seriesNames.length;
-  if (totalPoints > MAX_POINTS_FOR_BAR) {
-    return "line";
   }
 
   // ---------- Step 3：趋势投票 ----------

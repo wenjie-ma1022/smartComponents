@@ -47,7 +47,7 @@ const SmartLineChart: React.FC<SmartLineChartProps> = (props) => {
     ...restProps // 其他属性
   } = props;
 
-  // 生成智能配置
+  // 生成图表配置
   const smartMapConfig = React.useMemo<MapConfigType | undefined>(() => {
     if (!xAxisField) {
       console.error("xAxisField is required in mapConfig or props");
@@ -65,8 +65,6 @@ const SmartLineChart: React.FC<SmartLineChartProps> = (props) => {
       acc[key] = dataSource.map((d) => d[key]);
       return acc;
     }, {} as Record<string, number[]>);
-
-    // const highlightPoints = autoDetectHighlightPoints(dataSource, yAxisKeys);
 
     // 双轴推荐和聚类结果
     const result = autoAssignDualAxis(yAxisKeys, yAxisData);
