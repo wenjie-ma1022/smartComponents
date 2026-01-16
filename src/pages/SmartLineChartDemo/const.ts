@@ -284,7 +284,7 @@ export const mockComplexData = [
   },
   {
     date: "2024-03-31",
-    uv: 21802,
+    uv: 23026,
     pv: 37449,
     ctr: 0.11,
     cvr: 0.03,

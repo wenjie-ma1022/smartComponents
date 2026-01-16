@@ -48,11 +48,28 @@ export interface SeriesTypeConfig {
   seriesType?: SmartLineSeriesType;
 }
 
+/**
+ * 异常值/关键值自动检测配置
+ */
 export interface AutoDetectConfig {
+  /** 是否检测 IQR 离群值 */
   checkOutliers?: boolean;
+  /** 是否检测全局最大/最小值 */
   checkMaxMin?: boolean;
+  /** 是否检测突增/突降 */
   checkSharpChange?: boolean;
+  /** 是否检测趋势偏离（仅折线图有效） */
   checkTrendDeviation?: boolean;
+  /** IQR 系数，默认 1.5 */
+  iqrMultiplier?: number;
+  /** 趋势偏离标准差倍数，默认 2.5 */
+  trendSigma?: number;
+  /** 突变检测标准差倍数，默认 3.0 */
+  sharpChangeSigma?: number;
+  /** 线性拟合度阈值，低于此值不检测趋势异常，默认 0.4 */
+  minR2ForTrend?: number;
+  /** 是否打印调试日志，默认 false */
+  debug?: boolean;
 }
 
 /**
