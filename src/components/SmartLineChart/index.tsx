@@ -8,25 +8,25 @@
  * 4. 支持自定义左右 Y 轴名称、格式化
  */
 
-import React from "react";
-import { LineChart } from "@sto/sto-charts";
+import React from 'react';
+import { LineChart } from '@sto/sto-charts';
 import {
   autoAssignDualAxis,
   autoSetSeriesType,
   autoDetectHighlightPoints,
-} from "./algorithms/index";
-import type {
-  MapConfigType,
-  SeriesType,
-} from "@sto/sto-charts/es/line-chart/interface";
-import type { SmartLineChartProps } from "./index.d";
+} from './algorithms/index';
+import type { MapConfigType, SeriesType } from '@sto/sto-charts/es/line-chart/interface';
+import type { SmartLineChartProps } from './index.d';
 import {
   createSeriesConfig,
   buildXAxisConfig,
   buildYAxisConfig,
   getFilteredDataSource,
   buildMarkPointConfig,
-} from "./utils";
+} from './utils';
+import { use } from '@sto/sto-charts';
+import { MarkPointComponent } from '@sto/sto-charts/components';
+use([MarkPointComponent]);
 
 const SmartLineChart: React.FC<SmartLineChartProps> = (props) => {
   const {
@@ -35,6 +35,7 @@ const SmartLineChart: React.FC<SmartLineChartProps> = (props) => {
     xAxisField = mapConfig?.xAxis?.field, // X轴字段
     xAxisConfig, // X轴配置
     yAxisConfig, // Y轴配置
+
     seriesTypes, // 指定各字段的图表类型
     seriesNameMap, // 指定各字段的名称
     autoSeriesType = !seriesTypes, // 如果传入了 seriesTypes，使用手动模式；否则使用自动模式
@@ -50,14 +51,12 @@ const SmartLineChart: React.FC<SmartLineChartProps> = (props) => {
   // 生成图表配置
   const smartMapConfig = React.useMemo<MapConfigType | undefined>(() => {
     if (!xAxisField) {
-      console.error("xAxisField is required in mapConfig or props");
+      console.error('xAxisField is required in mapConfig or props');
       return undefined;
     }
     if (!dataSource?.length) return undefined;
 
-    const yAxisKeys = Object.keys(dataSource[0]).filter(
-      (k) => k !== xAxisField
-    );
+    const yAxisKeys = Object.keys(dataSource[0]).filter((k) => k !== xAxisField);
 
     if (!yAxisKeys.length) return undefined;
 
@@ -74,9 +73,7 @@ const SmartLineChart: React.FC<SmartLineChartProps> = (props) => {
     // 单轴情况
     if (!result.isDual) {
       // 自动判断图表类型
-      const autoTypeStr = autoSeriesType
-        ? autoSetSeriesType(dataSource, xAxisField)
-        : undefined;
+      const autoTypeStr = autoSeriesType ? autoSetSeriesType(dataSource, xAxisField) : undefined;
 
       series = yAxisKeys.map((k) => {
         const config = createSeriesConfig({
@@ -84,7 +81,7 @@ const SmartLineChart: React.FC<SmartLineChartProps> = (props) => {
           autoSeriesType,
           seriesNameMap,
           field: k,
-          defaultType: "bar",
+          defaultType: 'bar',
           autoTypeStr,
         });
 
@@ -92,15 +89,11 @@ const SmartLineChart: React.FC<SmartLineChartProps> = (props) => {
         const itemHighlightPoints = autoDetectHighlightPoints(
           yAxisData[k],
           config.type,
-          autoHighlightConfig
+          autoHighlightConfig,
         );
 
         // 添加 markPoint 高亮配置
-        const markPoint = buildMarkPointConfig(
-          itemHighlightPoints,
-          dataSource,
-          xAxisField
-        );
+        const markPoint = buildMarkPointConfig(itemHighlightPoints, dataSource, xAxisField);
         if (markPoint) {
           (config as any).markPoint = markPoint;
         }
@@ -112,17 +105,9 @@ const SmartLineChart: React.FC<SmartLineChartProps> = (props) => {
       if (!result.category) return undefined;
       const { left, right } = result.category;
 
-      const leftDataSource = getFilteredDataSource(
-        dataSource,
-        xAxisField,
-        left
-      );
+      const leftDataSource = getFilteredDataSource(dataSource, xAxisField, left);
 
-      const rightDataSource = getFilteredDataSource(
-        dataSource,
-        xAxisField,
-        right
-      );
+      const rightDataSource = getFilteredDataSource(dataSource, xAxisField, right);
 
       // 自动判断图表类型
       const leftAutoTypeStr = autoSeriesType
@@ -139,7 +124,7 @@ const SmartLineChart: React.FC<SmartLineChartProps> = (props) => {
           autoSeriesType,
           seriesNameMap,
           field: k,
-          defaultType: "bar",
+          defaultType: 'bar',
           autoTypeStr: leftAutoTypeStr,
           yAxisIndex: 0,
         });
@@ -148,13 +133,9 @@ const SmartLineChart: React.FC<SmartLineChartProps> = (props) => {
         const itemHighlightPoints = autoDetectHighlightPoints(
           yAxisData[k],
           config.type,
-          autoHighlightConfig
+          autoHighlightConfig,
         );
-        const markPoint = buildMarkPointConfig(
-          itemHighlightPoints,
-          dataSource,
-          xAxisField
-        );
+        const markPoint = buildMarkPointConfig(itemHighlightPoints, dataSource, xAxisField);
         if (markPoint) {
           (config as any).markPoint = markPoint;
         }
@@ -168,7 +149,7 @@ const SmartLineChart: React.FC<SmartLineChartProps> = (props) => {
           autoSeriesType,
           seriesNameMap,
           field: k,
-          defaultType: "line",
+          defaultType: 'line',
           autoTypeStr: rightAutoTypeStr,
           yAxisIndex: 1,
         });
@@ -177,13 +158,9 @@ const SmartLineChart: React.FC<SmartLineChartProps> = (props) => {
         const itemHighlightPoints = autoDetectHighlightPoints(
           yAxisData[k],
           config.type,
-          autoHighlightConfig
+          autoHighlightConfig,
         );
-        const markPoint = buildMarkPointConfig(
-          itemHighlightPoints,
-          dataSource,
-          xAxisField
-        );
+        const markPoint = buildMarkPointConfig(itemHighlightPoints, dataSource, xAxisField);
         if (markPoint) {
           (config as any).markPoint = markPoint;
         }
@@ -194,7 +171,7 @@ const SmartLineChart: React.FC<SmartLineChartProps> = (props) => {
       series = [...leftSeries, ...rightSeries];
     }
 
-    console.log("series:", series);
+    console.log('series:', series);
 
     return {
       ...(mapConfig || {}),
@@ -213,13 +190,7 @@ const SmartLineChart: React.FC<SmartLineChartProps> = (props) => {
     seriesNameMap,
   ]);
 
-  return (
-    <LineChart
-      dataSource={dataSource}
-      mapConfig={smartMapConfig}
-      {...restProps}
-    />
-  );
+  return <LineChart dataSource={dataSource} mapConfig={smartMapConfig} {...restProps} />;
 };
 
 export default SmartLineChart;

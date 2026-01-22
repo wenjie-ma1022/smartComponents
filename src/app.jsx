@@ -8,12 +8,6 @@ import ErrorBoundary from "@stofe/sui-patcher/es/error-boundary";
 import "windi.css";
 import "@sto/cn-ui/es/global";
 
-// 注册 ECharts MarkPointComponent（sto-charts 未内置）
-import * as echarts from "echarts/core";
-import { MarkPointComponent } from "echarts/components";
-// TODO: 后续让组件库支持
-echarts.use([MarkPointComponent]);
-
 const appConfig = {
   app: {
     // 可选，默认 ice-container，根节点 id
