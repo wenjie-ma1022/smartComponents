@@ -15,13 +15,13 @@
 ### 基础用法
 
 ```tsx
-import SmartLineChart from "@/components/SmartLineChart";
+import SmartLineChart from '@/components/SmartLineChart';
 
 function Demo() {
   const dataSource = [
-    { date: "2024-01", sales: 1000, profit: 200 },
-    { date: "2024-02", sales: 1500, profit: 300 },
-    { date: "2024-03", sales: 1200, profit: 250 },
+    { date: '2024-01', sales: 1000, profit: 200 },
+    { date: '2024-02', sales: 1500, profit: 300 },
+    { date: '2024-03', sales: 1200, profit: 250 },
   ];
 
   return <SmartLineChart dataSource={dataSource} xAxisField="date" />;
@@ -31,13 +31,13 @@ function Demo() {
 ### 自定义 Y 轴配置
 
 ```tsx
-import SmartLineChart from "@/components/SmartLineChart";
+import SmartLineChart from '@/components/SmartLineChart';
 
 function Demo() {
   const dataSource = [
-    { date: "2024-01", sales: 1000, ctr: 0.12 },
-    { date: "2024-02", sales: 1500, ctr: 0.15 },
-    { date: "2024-03", sales: 1200, ctr: 0.13 },
+    { date: '2024-01', sales: 1000, ctr: 0.12 },
+    { date: '2024-02', sales: 1500, ctr: 0.15 },
+    { date: '2024-03', sales: 1200, ctr: 0.13 },
   ];
 
   return (
@@ -45,10 +45,10 @@ function Demo() {
       dataSource={dataSource}
       xAxisField="date"
       yAxisConfig={{
-        leftName: "销售额",
-        rightName: "点击率",
-        leftFormat: "¥",
-        rightFormat: "%",
+        leftName: '销售额',
+        rightName: '点击率',
+        leftFormat: '¥',
+        rightFormat: '%',
         leftRetain: 0,
         rightRetain: 2,
       }}
@@ -60,23 +60,23 @@ function Demo() {
 ### 智能类型选择示例
 
 ```tsx
-import SmartLineChart from "@/components/SmartLineChart";
+import SmartLineChart from '@/components/SmartLineChart';
 
 function Demo() {
   // 趋势明显的数据 → 自动选择折线图
   const trendData = [
-    { month: "2024-01", sales: 1000, profit: 150 },
-    { month: "2024-02", sales: 1200, profit: 180 },
-    { month: "2024-03", sales: 1400, profit: 210 },
-    { month: "2024-04", sales: 1600, profit: 240 },
-    { month: "2024-05", sales: 1800, profit: 270 },
+    { month: '2024-01', sales: 1000, profit: 150 },
+    { month: '2024-02', sales: 1200, profit: 180 },
+    { month: '2024-03', sales: 1400, profit: 210 },
+    { month: '2024-04', sales: 1600, profit: 240 },
+    { month: '2024-05', sales: 1800, profit: 270 },
   ];
 
   // 分类数据 → 自动选择柱状图
   const categoryData = [
-    { category: "A类", count: 100 },
-    { category: "B类", count: 150 },
-    { category: "C类", count: 120 },
+    { category: 'A类', count: 100 },
+    { category: 'B类', count: 150 },
+    { category: 'C类', count: 120 },
   ];
 
   return (
@@ -94,13 +94,13 @@ function Demo() {
 ### 手动指定图表类型
 
 ```tsx
-import SmartLineChart from "@/components/SmartLineChart";
+import SmartLineChart from '@/components/SmartLineChart';
 
 function Demo() {
   const dataSource = [
-    { date: "2024-01", uv: 1000, pv: 5000, ctr: 0.12 },
-    { date: "2024-02", uv: 1500, pv: 6000, ctr: 0.15 },
-    { date: "2024-03", uv: 1200, pv: 5500, ctr: 0.13 },
+    { date: '2024-01', uv: 1000, pv: 5000, ctr: 0.12 },
+    { date: '2024-02', uv: 1500, pv: 6000, ctr: 0.15 },
+    { date: '2024-03', uv: 1200, pv: 5500, ctr: 0.13 },
   ];
 
   return (
@@ -108,9 +108,9 @@ function Demo() {
       dataSource={dataSource}
       xAxisField="date"
       seriesTypes={{
-        uv: "bar",
-        pv: "bar",
-        ctr: "line",
+        uv: 'bar',
+        pv: 'bar',
+        ctr: 'line',
       }}
       autoSeriesType={false}
     />
@@ -121,13 +121,13 @@ function Demo() {
 ### 完整配置示例
 
 ```tsx
-import SmartLineChart from "@/components/SmartLineChart";
+import SmartLineChart from '@/components/SmartLineChart';
 
 function Demo() {
   const dataSource = [
-    { date: "2024-01", uv: 1000, pv: 5000, ctr: 0.12, cvr: 0.03 },
-    { date: "2024-02", uv: 1500, pv: 6000, ctr: 0.15, cvr: 0.04 },
-    { date: "2024-03", uv: 1200, pv: 5500, ctr: 0.13, cvr: 0.035 },
+    { date: '2024-01', uv: 1000, pv: 5000, ctr: 0.12, cvr: 0.03 },
+    { date: '2024-02', uv: 1500, pv: 6000, ctr: 0.15, cvr: 0.04 },
+    { date: '2024-03', uv: 1200, pv: 5500, ctr: 0.13, cvr: 0.035 },
   ];
 
   return (
@@ -139,16 +139,16 @@ function Demo() {
       tooltipTheme="dark"
       showLabelValue={false}
       yAxisConfig={{
-        leftName: "访问量",
-        rightName: "转化率",
-        rightFormat: "%",
+        leftName: '访问量',
+        rightName: '转化率',
+        rightFormat: '%',
         rightRetain: 2,
       }}
       seriesTypes={{
-        uv: "bar",
-        pv: "bar",
-        ctr: "line",
-        cvr: "line",
+        uv: 'bar',
+        pv: 'bar',
+        ctr: 'line',
+        cvr: 'line',
       }}
     />
   );
@@ -183,76 +183,113 @@ interface YAxisFormatConfig {
 
 ```typescript
 interface SeriesTypeConfig {
-  [field: string]: "line" | "bar";
+  [field: string]: 'line' | 'bar';
 }
 ```
 
-## 算法说明
+## 智能算法体系
 
-### 双轴判断逻辑
+SmartLineChart 组件内置了三大智能算法，实现"零配置"的最优图表展示：
 
-组件会自动分析数据特征，判断是否需要使用双轴图：
+| 算法                      | 功能                         | 详细文档                                                     |
+| ------------------------- | ---------------------------- | ------------------------------------------------------------ |
+| autoSetSeriesType         | 自动选择图表类型（bar/line） | [查看详情](./algorithms/README/autoSetSeriesType.md)         |
+| autoAssignDualAxis        | 自动双轴判断与左右轴分配     | [查看详情](./algorithms/README/autoAssignDualAxis.md)        |
+| autoDetectOutliersAndKeys | 异常值/关键值自动检测与高亮  | [查看详情](./algorithms/README/autoDetectOutliersAndKeys.md) |
 
-1. **数值类型判断**：区分比例数据（-1 到 1 之间）和绝对值数据
-2. **数值差距判断**：
-   - 当存在比例数据和绝对值数据混合时，使用双轴
-   - 当所有指标的最大值差距超过 10 倍时，建议使用双轴
-   - 包含除零保护，正确处理负值和零值数据
-3. **K-means 聚类**：使用 K-means++ 算法（k=2）将指标分为两组，分别映射到左右轴
+---
 
-### 图表类型自动选择
+### 算法一：图表类型自动选择（autoSetSeriesType）
 
-当 `autoSeriesType` 为 `true` 时，组件会通过智能算法自动判断使用柱状图（bar）还是折线图（line）：
+自动判断使用柱状图（bar）还是折线图（line），采用 **四步决策框架**：
 
-#### 决策流程
+| 步骤   | 决策内容       | 核心思想                               |
+| ------ | -------------- | -------------------------------------- |
+| Step 1 | 数据点数量判断 | 点少用柱状图，点多用折线图（避免拥挤） |
+| Step 2 | X 轴语义判断   | 连续型数据（时间/有序数值）适合折线图  |
+| Step 3 | 趋势投票分析   | 对所有 Y 轴数据进行线性回归分析        |
+| Step 4 | 综合决策       | 基于趋势投票比例和动态阈值确定最终类型 |
 
-1. **X 轴连续性判断**
+**核心技术**：
 
-   - 时间格式数据（如 "2024-01-01", "01/02", "2024.01.02" 等）
-   - 有序数值数据（如 1, 5, 7, 14）
-   - 非连续数据（如分类字段）直接使用柱状图
+- 支持 10 种日期格式自动识别
+- IQR 四分位距法过滤异常值
+- 线性回归计算 R² 拟合优度
+- 置信度加权的双层阈值机制
 
-2. **总点数检查**
+---
 
-   - 当图表总点数（X 轴数据行数 × Y 轴字段数量）超过 80 时，直接使用折线图
-   - 避免柱状图过于拥挤
+### 算法二：双轴判断与左右轴分配（autoAssignDualAxis）
 
-3. **趋势分析**
+自动判断是否需要双轴图，并智能分配左右 Y 轴，采用 **两步决策框架**：
 
-   - 对每个 Y 轴字段进行鲁棒线性回归分析
-   - 自动检测和过滤异常值（IQR 方法）
-   - 计算趋势强度（R² 值）、变化幅度（斜率）和置信度
-   - 综合数据质量、趋势强度、拟合优度和异常值影响进行评估
-   - 根据置信度动态调整趋势判断阈值
+| 步骤   | 决策内容       | 核心思想                                  |
+| ------ | -------------- | ----------------------------------------- |
+| Step 1 | 双轴必要性判断 | 基于数值类型（比例/绝对值）和量级差异判断 |
+| Step 2 | 左右轴分配     | 使用 K-Means++ 聚类算法智能分组           |
 
-4. **趋势投票**
-   - 统计具有趋势的字段占比
-   - 超过 50% 的字段具有趋势时，使用折线图
-   - 当数据点数 ≥ 12 时，阈值降低至 30%（更倾向于使用折线图）
+**判断规则**：
 
-#### 算法特点
+- 同时存在比例值（-1~1）和绝对值 → 需要双轴
+- 指标最大值差距超过 6 倍 → 需要双轴
+- 使用 min/max/median 三维特征向量进行聚类
+- 中位数大的组分配到左轴（主轴）
 
-- **智能趋势识别**：通过线性回归判断数据是否有明显的上升/下降趋势
-- **多字段投票**：综合考虑所有 Y 轴字段的趋势特征
-- **点数适配**：数据点数多时更倾向于折线图，减少视觉干扰
-- **健壮性**：自动过滤无效数据，处理边界情况
+---
 
-### 算法调优
+### 算法三：异常值/关键值检测（autoDetectOutliersAndKeys）
 
-组件内置了可配置的算法阈值，您可以通过修改 `algorithms.ts` 文件顶部的常量来调整算法行为：
+自动检测并高亮数据中的异常值与关键点，提供 **四种检测能力**：
+
+| 检测类型       | 标记类型         | 核心思想                            |
+| -------------- | ---------------- | ----------------------------------- |
+| IQR 离群值检测 | `outlier`        | 基于四分位距识别统计异常点          |
+| 趋势偏离检测   | `trendDeviation` | 基于线性回归残差识别偏离趋势的点    |
+| 全局极值检测   | `keyPoint`       | 识别全局最大值和最小值              |
+| 突变检测       | `keyPoint`       | 基于一阶差分识别数据突增/突降的拐点 |
+
+**特点**：
+
+- 优先级机制：outlier > trendDeviation > keyPoint
+- R² 门槛：避免无意义的趋势检测
+- 支持并列极值标记
+
+---
+
+### 算法配置参数
+
+组件内置了可配置的算法阈值，可通过修改对应算法文件顶部的常量来调整行为：
+
+**autoSetSeriesType.ts**（图表类型选择）：
 
 ```typescript
-// 双轴判断相关
-const MAX_GAP = 10; // 数值差距倍数阈值
+const TREND_R2_THRESHOLD = 0.6; // 趋势判断的 R² 阈值
+const TREND_SLOPE_FACTOR = 0.01; // 斜率占值域比例的最小阈值
+const MAX_POINTS_FOR_BAR = 80; // 总点数超过此值直接用折线图
+const POINT_COUNT_FOR_BONUS = 12; // 数据点超过此值时降低趋势阈值
+const POINT_BONUS = -0.2; // 点数多时的阈值调整量
+const BASE_TREND_THRESHOLD = 0.5; // 趋势投票基础阈值（50%）
+const MIN_VALID_RATIO = 0.5; // Y 轴有效数据的最小占比
+```
 
-// 图表类型自动选择相关
-const TREND_R2_THRESHOLD = 0.6; // 趋势强度阈值（R²）
-const TREND_SLOPE_FACTOR = 0.01; // 斜率相对阈值系数
-const MAX_POINTS_FOR_BAR = 80; // 最大柱状图点数
-const POINT_COUNT_FOR_BONUS = 12; // 点数奖励触发阈值
-const POINT_BONUS = -0.2; // 点数多时的阈值调整
-const BASE_TREND_THRESHOLD = 0.5; // 基础趋势投票阈值
-const MIN_VALID_RATIO = 0.5; // Y轴字段有效数据占比
+**autoAssignDualAxis.ts**（双轴判断）：
+
+```typescript
+const MAX_GAP = 6; // 双轴判断的最大差距倍数阈值
+```
+
+**autoDetectOutliersAndKeys.ts**（异常值检测）：
+
+```typescript
+const DEFAULT_OPTIONS = {
+  iqrMultiplier: 1.5, // IQR 倍数
+  trendSigma: 2.5, // 趋势残差 Z-Score 阈值
+  sharpChangeSigma: 3.0, // 突变检测 Z-Score 阈值
+  minSamplesForIqr: 5, // IQR 检测最小样本数
+  minSamplesForTrend: 6, // 趋势检测最小样本数
+  minSamplesForSharpChange: 3, // 突变检测最小样本数
+  minR2ForTrend: 0.4, // 趋势检测 R² 阈值
+};
 ```
 
 ## 注意事项
