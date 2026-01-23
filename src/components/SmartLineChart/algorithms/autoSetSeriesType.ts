@@ -8,8 +8,8 @@
  * 4. 综合决策：基于趋势投票比例和动态阈值确定最终类型
  ******************************************************/
 
-import type { DataSourceItem } from "./index.d";
-import type { SmartLineSeriesType } from "../index.d";
+import type { DataSourceItem } from './index.d';
+import type { SmartLineSeriesType } from '../index.d';
 
 // --------------- 算法经验值配置（统一管理，便于调优） ---------------
 const TREND_R2_THRESHOLD = 0.6; // 趋势判断：R² 阈值
@@ -46,7 +46,7 @@ function isDate(value: any): boolean {
     return true;
   }
 
-  if (typeof value === "string") {
+  if (typeof value === 'string') {
     // 使用预定义的正则常量，避免每次调用时重复创建
     const looksLikeDate = DATE_PATTERNS.some((p) => p.test(value));
     return looksLikeDate && !isNaN(Date.parse(value));
@@ -94,9 +94,7 @@ function calcLinearTrend(values: number[]) {
   }
 
   // 数据预处理：移除无效值
-  const cleanValues = values.filter(
-    (v) => Number.isFinite(v) && !Number.isNaN(v)
-  );
+  const cleanValues = values.filter((v) => Number.isFinite(v) && !Number.isNaN(v));
   const cleanN = cleanValues.length;
   if (cleanN < 3) {
     return { slope: 0, r2: 0, confidence: 0, range: 0 };
@@ -128,9 +126,7 @@ function calcLinearTrend(values: number[]) {
   if (iqr > 0) {
     const lowerBound = q1 - 1.5 * iqr;
     const upperBound = q3 + 1.5 * iqr;
-    const filteredValues = cleanValues.filter(
-      (v) => v >= lowerBound && v <= upperBound
-    );
+    const filteredValues = cleanValues.filter((v) => v >= lowerBound && v <= upperBound);
     outlierImpact = filteredValues.length / cleanN;
     finalValues = filteredValues.length >= 3 ? filteredValues : cleanValues;
   } else {
@@ -195,13 +191,7 @@ function calcLinearTrend(values: number[]) {
   // 加权计算置信度
   const confidence = Math.max(
     0,
-    Math.min(
-      1,
-      dataQuality * 0.3 +
-        trendStrength * 0.3 +
-        fitQuality * 0.3 +
-        outlierImpact * 0.1
-    )
+    Math.min(1, dataQuality * 0.3 + trendStrength * 0.3 + fitQuality * 0.3 + outlierImpact * 0.1),
   );
 
   return {
@@ -219,7 +209,7 @@ function calcLinearTrend(values: number[]) {
 
 function extractYSeries(
   dataSource: DataSourceItem[],
-  xAxisField: string
+  xAxisField: string,
 ): Record<string, number[]> {
   // 边界检查
   if (!dataSource || dataSource.length === 0) {
@@ -231,9 +221,7 @@ function extractYSeries(
     return {};
   }
 
-  const candidateKeys = Object.keys(firstRow).filter(
-    (key) => key !== xAxisField
-  );
+  const candidateKeys = Object.keys(firstRow).filter((key) => key !== xAxisField);
 
   const seriesMap: Record<string, number[]> = {};
 
@@ -242,11 +230,7 @@ function extractYSeries(
     const values = dataSource
       .map((row) => row[key])
       .filter(
-        (v) =>
-          v !== null &&
-          v !== undefined &&
-          typeof v === "number" &&
-          !Number.isNaN(v)
+        (v) => v !== null && v !== undefined && typeof v === 'number' && !Number.isNaN(v),
       ) as number[];
 
     // 只有当有效数值占比超过阈值时，才认为这是一个有效的 Y series
@@ -267,13 +251,10 @@ function extractYSeries(
  * 3. 趋势投票分析：对所有 Y 轴数据进行线性回归分析
  * 4. 综合决策：基于趋势投票比例和动态阈值确定最终类型
  */
-function autoSetSeriesType(
-  dataSource: DataSourceItem[],
-  xAxisField: string
-): SmartLineSeriesType {
+function autoSetSeriesType(dataSource: DataSourceItem[], xAxisField: string): SmartLineSeriesType {
   // ---------- 边界保护 ----------
   if (!Array.isArray(dataSource) || dataSource.length < 3) {
-    return "bar";
+    return 'bar';
   }
 
   // ---------- Step 1：判断点数 ----------
@@ -281,7 +262,7 @@ function autoSetSeriesType(
 
   // 点数太少，直接使用柱状图
   if (xAxisValues.length < 4) {
-    return "bar";
+    return 'bar';
   }
 
   const ySeriesMap = extractYSeries(dataSource, xAxisField);
@@ -289,13 +270,13 @@ function autoSetSeriesType(
 
   // 没有 Y series，直接使用柱状图
   if (seriesNames.length === 0) {
-    return "bar";
+    return 'bar';
   }
 
   // 点数过多，柱状图会很拥挤，直接使用折线图
   const totalPoints = xAxisValues.length * seriesNames.length;
   if (totalPoints > MAX_POINTS_FOR_BAR) {
-    return "line";
+    return 'line';
   }
 
   // ---------- Step 2：X 轴语义判断 ----------
@@ -308,7 +289,7 @@ function autoSetSeriesType(
 
   // X 轴非连续（纯分类） → bar
   if (!isContinuousX) {
-    return "bar";
+    return 'bar';
   }
 
   // ---------- Step 3：趋势投票 ----------
@@ -333,8 +314,7 @@ function autoSetSeriesType(
     const hasStrongTrend =
       r2 >= TREND_R2_THRESHOLD && Math.abs(slope) >= TREND_SLOPE_FACTOR * range;
     const hasModerateTrend =
-      r2 >= TREND_R2_THRESHOLD * 0.8 &&
-      Math.abs(slope) >= TREND_SLOPE_FACTOR * range * 0.8;
+      r2 >= TREND_R2_THRESHOLD * 0.8 && Math.abs(slope) >= TREND_SLOPE_FACTOR * range * 0.8;
 
     // 根据置信度选择更严格或宽松的判断标准
     const hasTrend = confidence > 0.7 ? hasStrongTrend : hasModerateTrend;
@@ -345,7 +325,7 @@ function autoSetSeriesType(
 
   // 没有有效 series 可分析
   if (validSeriesCount === 0) {
-    return "bar";
+    return 'bar';
   }
 
   const trendRatio = trendSeriesCount / validSeriesCount;
@@ -357,16 +337,15 @@ function autoSetSeriesType(
    * - 点数少时，保持原有阈值
    * 这样既保留了「点多用折线」的直觉，又不会完全跳过趋势分析
    */
-  const pointBonus =
-    dataSource.length >= POINT_COUNT_FOR_BONUS ? POINT_BONUS : 0;
+  const pointBonus = dataSource.length >= POINT_COUNT_FOR_BONUS ? POINT_BONUS : 0;
   const threshold = BASE_TREND_THRESHOLD + pointBonus;
 
   // 超过阈值的 series 具备趋势 → line
   if (trendRatio >= threshold) {
-    return "line";
+    return 'line';
   }
 
-  return "bar";
+  return 'bar';
 }
 
 export default autoSetSeriesType;

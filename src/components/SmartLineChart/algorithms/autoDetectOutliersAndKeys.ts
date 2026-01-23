@@ -8,12 +8,12 @@
  * 4. 突变检测：基于一阶差分识别数据突增/突降的拐点
  *******************************************************/
 
-import type { AutoDetectConfig, SmartLineSeriesType } from "../index.d";
+import type { AutoDetectConfig, SmartLineSeriesType } from '../index.d';
 
 export interface HighlightPoint {
   index: number;
   value: number;
-  type: "outlier" | "trendDeviation" | "keyPoint";
+  type: 'outlier' | 'trendDeviation' | 'keyPoint';
   reason: string;
 }
 
@@ -53,8 +53,7 @@ function mean(arr: number[]): number {
 /** 计算样本标准差 (Sample Standard Deviation, N-1) */
 function std(arr: number[], mu: number): number {
   if (arr.length <= 1) return 0;
-  const variance =
-    arr.reduce((s, v) => s + Math.pow(v - mu, 2), 0) / (arr.length - 1);
+  const variance = arr.reduce((s, v) => s + Math.pow(v - mu, 2), 0) / (arr.length - 1);
   return Math.sqrt(variance);
 }
 
@@ -109,10 +108,7 @@ function linearRegression(values: number[]) {
  * ======================== */
 
 /** ① IQR 统计异常（箱线图逻辑） */
-function detectIqrOutliers(
-  values: number[],
-  opts: Required<DetectionOptions>
-): HighlightPoint[] {
+function detectIqrOutliers(values: number[], opts: Required<DetectionOptions>): HighlightPoint[] {
   if (values.length < opts.minSamplesForIqr) return [];
 
   // 拷贝并排序，避免修改原数组
@@ -132,8 +128,8 @@ function detectIqrOutliers(
         return {
           index,
           value: v,
-          type: "outlier", // 离群值
-          reason: v < lower ? "数值异常偏低" : "数值异常偏高",
+          type: 'outlier', // 离群值
+          reason: v < lower ? '数值异常偏低' : '数值异常偏高',
         } as HighlightPoint;
       }
       return null;
@@ -144,7 +140,7 @@ function detectIqrOutliers(
 /** ② 趋势残差异常（检测偏离线性回归线的点） */
 function detectTrendDeviation(
   values: number[],
-  opts: Required<DetectionOptions>
+  opts: Required<DetectionOptions>,
 ): HighlightPoint[] {
   if (values.length < opts.minSamplesForTrend) return [];
 
@@ -152,8 +148,7 @@ function detectTrendDeviation(
 
   // [优化] 如果数据根本不像一条直线，强行做趋势检测没有意义
   if (r2 < opts.minR2ForTrend) {
-    if (opts.debug)
-      console.log(`[Trend] R2 (${r2.toFixed(2)}) 低于阈值，跳过趋势检测`);
+    if (opts.debug) console.log(`[Trend] R2 (${r2.toFixed(2)}) 低于阈值，跳过趋势检测`);
     return [];
   }
 
@@ -170,8 +165,8 @@ function detectTrendDeviation(
         return {
           index,
           value: values[index],
-          type: "trendDeviation", // 趋势偏离
-          reason: "明显偏离整体趋势",
+          type: 'trendDeviation', // 趋势偏离
+          reason: '明显偏离整体趋势',
         } as HighlightPoint;
       }
       return null;
@@ -194,7 +189,7 @@ function detectGlobalExtrema(values: number[]): HighlightPoint[] {
   // 特殊情况：直线（最大值等于最小值），通常只标记第一个或不标记
   // 这里选择只标记第一个点作为代表，避免全屏高亮
   if (min === max) {
-    return [{ index: 0, value: max, type: "keyPoint", reason: "全量恒定值" }];
+    return [{ index: 0, value: max, type: 'keyPoint', reason: '全量恒定值' }];
   }
   const result: HighlightPoint[] = [];
 
@@ -204,15 +199,15 @@ function detectGlobalExtrema(values: number[]): HighlightPoint[] {
       result.push({
         index: i,
         value: v,
-        type: "keyPoint", // 全局极值
-        reason: "全局最大值",
+        type: 'keyPoint', // 全局极值
+        reason: '全局最大值',
       });
     } else if (v === min) {
       result.push({
         index: i,
         value: v,
-        type: "keyPoint",
-        reason: "全局最小值",
+        type: 'keyPoint',
+        reason: '全局最小值',
       });
     }
   });
@@ -220,10 +215,7 @@ function detectGlobalExtrema(values: number[]): HighlightPoint[] {
 }
 
 /** ④ 关键点：突增 / 突降（基于一阶差分） */
-function detectSharpChange(
-  values: number[],
-  opts: Required<DetectionOptions>
-): HighlightPoint[] {
+function detectSharpChange(values: number[], opts: Required<DetectionOptions>): HighlightPoint[] {
   if (values.length < opts.minSamplesForSharpChange) return [];
 
   // 计算相邻点差值 diff[i] = v[i] - v[i-1]
@@ -243,8 +235,8 @@ function detectSharpChange(
         return {
           index: realIndex,
           value: values[realIndex],
-          type: "keyPoint", // 突变检测
-          reason: d > 0 ? "数据突增" : "数据突降",
+          type: 'keyPoint', // 突变检测
+          reason: d > 0 ? '数据突增' : '数据突降',
         } as HighlightPoint;
       }
       return null;
@@ -257,7 +249,7 @@ function detectSharpChange(
  * ======================== */
 
 // 优先级定义：数值越大优先级越高
-const TYPE_PRIORITY: Record<HighlightPoint["type"], number> = {
+const TYPE_PRIORITY: Record<HighlightPoint['type'], number> = {
   outlier: 3,
   trendDeviation: 2,
   keyPoint: 1,
@@ -272,7 +264,7 @@ const TYPE_PRIORITY: Record<HighlightPoint["type"], number> = {
 function autoDetectOutliersAndKeys(
   values: number[],
   chartType: SmartLineSeriesType,
-  detectConfig?: AutoDetectConfig & Partial<DetectionOptions>
+  detectConfig?: AutoDetectConfig & Partial<DetectionOptions>,
 ): HighlightPoint[] {
   if (!detectConfig || values.length === 0) return [];
 
@@ -288,19 +280,16 @@ function autoDetectOutliersAndKeys(
     .filter((e) => Number.isFinite(e.value));
 
   if (validEntries.length === 0) {
-    if (opts.debug) console.warn("[AutoDetect] 数据全部无效，跳过");
+    if (opts.debug) console.warn('[AutoDetect] 数据全部无效，跳过');
     return [];
   }
 
   if (opts.debug && validEntries.length < values.length) {
-    console.warn(
-      `[AutoDetect] 过滤了 ${values.length - validEntries.length} 个无效点`
-    );
+    console.warn(`[AutoDetect] 过滤了 ${values.length - validEntries.length} 个无效点`);
   }
 
   const cleanValues = validEntries.map((e) => e.value);
-  const toOriginalIndex = (cleanIndex: number) =>
-    validEntries[cleanIndex].originalIndex;
+  const toOriginalIndex = (cleanIndex: number) => validEntries[cleanIndex].originalIndex;
 
   // 3. 结果容器
   const resultMap = new Map<number, HighlightPoint>();
@@ -320,8 +309,7 @@ function autoDetectOutliersAndKeys(
       value: values[toOriginalIndex(p.index)], // 确保拿到原始值
     }));
 
-  const { checkOutliers, checkMaxMin, checkSharpChange, checkTrendDeviation } =
-    detectConfig;
+  const { checkOutliers, checkMaxMin, checkSharpChange, checkTrendDeviation } = detectConfig;
 
   // 5. 执行检测流程
 
@@ -331,10 +319,8 @@ function autoDetectOutliersAndKeys(
   }
 
   // （2） 趋势偏离 (仅折线图有效)
-  if (checkTrendDeviation && chartType === "line") {
-    mapToOriginalIndex(detectTrendDeviation(cleanValues, opts)).forEach(
-      addPoint
-    );
+  if (checkTrendDeviation && chartType === 'line') {
+    mapToOriginalIndex(detectTrendDeviation(cleanValues, opts)).forEach(addPoint);
   }
 
   // （3） 突变检测 (归类为 KeyPoint)

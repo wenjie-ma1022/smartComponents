@@ -9,13 +9,15 @@
  */
 
 import React from 'react';
-import { LineChart } from '@sto/sto-charts';
+import type { MapConfigType, SeriesType } from '@sto/sto-charts/es/line-chart/interface';
+import { LineChart, use } from '@sto/sto-charts';
+import { MarkPointComponent } from '@sto/sto-charts/components';
+
 import {
   autoAssignDualAxis,
   autoSetSeriesType,
   autoDetectHighlightPoints,
 } from './algorithms/index';
-import type { MapConfigType, SeriesType } from '@sto/sto-charts/es/line-chart/interface';
 import type { SmartLineChartProps } from './index.d';
 import {
   createSeriesConfig,
@@ -24,8 +26,7 @@ import {
   getFilteredDataSource,
   buildMarkPointConfig,
 } from './utils';
-import { use } from '@sto/sto-charts';
-import { MarkPointComponent } from '@sto/sto-charts/components';
+
 use([MarkPointComponent]);
 
 const SmartLineChart: React.FC<SmartLineChartProps> = (props) => {
@@ -63,7 +64,7 @@ const SmartLineChart: React.FC<SmartLineChartProps> = (props) => {
     const yAxisData = yAxisKeys.reduce((acc, key) => {
       acc[key] = dataSource.map((d) => d[key]);
       return acc;
-    }, {} as Record<string, number[]>);
+    }, {});
 
     // 双轴推荐和聚类结果
     const result = autoAssignDualAxis(yAxisKeys, yAxisData);
@@ -95,7 +96,7 @@ const SmartLineChart: React.FC<SmartLineChartProps> = (props) => {
         // 添加 markPoint 高亮配置
         const markPoint = buildMarkPointConfig(itemHighlightPoints, dataSource, xAxisField);
         if (markPoint) {
-          (config as any).markPoint = markPoint;
+          config.markPoint = markPoint;
         }
 
         return config;
@@ -137,7 +138,7 @@ const SmartLineChart: React.FC<SmartLineChartProps> = (props) => {
         );
         const markPoint = buildMarkPointConfig(itemHighlightPoints, dataSource, xAxisField);
         if (markPoint) {
-          (config as any).markPoint = markPoint;
+          config.markPoint = markPoint;
         }
 
         return config;
@@ -162,7 +163,7 @@ const SmartLineChart: React.FC<SmartLineChartProps> = (props) => {
         );
         const markPoint = buildMarkPointConfig(itemHighlightPoints, dataSource, xAxisField);
         if (markPoint) {
-          (config as any).markPoint = markPoint;
+          config.markPoint = markPoint;
         }
 
         return config;
@@ -171,6 +172,7 @@ const SmartLineChart: React.FC<SmartLineChartProps> = (props) => {
       series = [...leftSeries, ...rightSeries];
     }
 
+    // eslint-disable-next-line no-console
     console.log('series:', series);
 
     return {
@@ -188,6 +190,7 @@ const SmartLineChart: React.FC<SmartLineChartProps> = (props) => {
     yAxisConfig,
     seriesTypes,
     seriesNameMap,
+    autoHighlightConfig,
   ]);
 
   return <LineChart dataSource={dataSource} mapConfig={smartMapConfig} {...restProps} />;

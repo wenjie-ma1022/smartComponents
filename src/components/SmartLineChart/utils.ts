@@ -1,8 +1,4 @@
-import type {
-  SeriesType,
-  MapConfigType,
-  YAxisType,
-} from "@sto/sto-charts/es/line-chart/interface";
+import type { SeriesType, MapConfigType, YAxisType } from '@sto/sto-charts/es/line-chart/interface';
 import type {
   SeriesConfig,
   SeriesTypeConfig,
@@ -10,57 +6,57 @@ import type {
   XAxisConfig,
   DataSourceItem,
   SmartLineSeriesType,
-} from "./index.d";
-import type { HighlightPoint } from "./algorithms/autoDetectOutliersAndKeys";
+} from './index.d';
+import type { HighlightPoint } from './algorithms/autoDetectOutliersAndKeys';
 
 /** 高亮点样式配置 */
 const HIGHLIGHT_STYLES = {
   // 离群值 - 红色警告
   outlier: {
-    symbol: "circle",
+    symbol: 'circle',
     symbolSize: 12,
     itemStyle: {
-      color: "#ff4d4f",
-      borderColor: "#fff",
+      color: '#ff4d4f',
+      borderColor: '#fff',
       borderWidth: 2,
       shadowBlur: 4,
-      shadowColor: "rgba(255, 77, 79, 0.4)",
+      shadowColor: 'rgba(255, 77, 79, 0.4)',
     },
     label: {
-      color: "#ff4d4f",
-      fontWeight: "bold" as const,
+      color: '#ff4d4f',
+      fontWeight: 'bold',
     },
   },
   // 趋势偏离 - 橙色警告
   trendDeviation: {
-    symbol: "diamond",
+    symbol: 'diamond',
     symbolSize: 10,
     itemStyle: {
-      color: "#fa8c16",
-      borderColor: "#fff",
+      color: '#fa8c16',
+      borderColor: '#fff',
       borderWidth: 2,
       shadowBlur: 4,
-      shadowColor: "rgba(250, 140, 22, 0.4)",
+      shadowColor: 'rgba(250, 140, 22, 0.4)',
     },
     label: {
-      color: "#fa8c16",
-      fontWeight: "bold" as const,
+      color: '#fa8c16',
+      fontWeight: 'bold',
     },
   },
   // 关键点（最大/最小/突变）- 蓝色标记
   keyPoint: {
-    symbol: "pin",
+    symbol: 'pin',
     symbolSize: 14,
     itemStyle: {
-      color: "#1890ff",
-      borderColor: "#fff",
+      color: '#1890ff',
+      borderColor: '#fff',
       borderWidth: 2,
       shadowBlur: 4,
-      shadowColor: "rgba(24, 144, 255, 0.4)",
+      shadowColor: 'rgba(24, 144, 255, 0.4)',
     },
     label: {
-      color: "#1890ff",
-      fontWeight: "bold" as const,
+      color: '#1890ff',
+      fontWeight: 'bold',
     },
   },
 };
@@ -71,30 +67,32 @@ const HIGHLIGHT_STYLES = {
 export function buildMarkPointConfig(
   highlightPoints: HighlightPoint[],
   dataSource: DataSourceItem[],
-  xAxisField: string
-) {
+  xAxisField: string,
+): any {
   if (!highlightPoints?.length) return undefined;
 
   const data = highlightPoints.map((point) => {
     const style = HIGHLIGHT_STYLES[point.type];
     const xValue = dataSource[point.index]?.[xAxisField];
 
-    return {
+    const markPointItem: any = {
       name: point.reason,
       coord: [xValue, point.value],
       value: point.value,
       ...style,
       label: {
         show: true,
-        position: "top" as const,
+        position: 'top',
         formatter: point.reason,
         fontSize: 10,
         padding: [2, 4],
-        backgroundColor: "rgba(255,255,255,0.9)",
+        backgroundColor: 'rgba(255,255,255,0.9)',
         borderRadius: 2,
         ...style.label,
       },
     };
+
+    return markPointItem;
   });
 
   return {
@@ -109,14 +107,14 @@ function determineSeriesType(
   autoSeriesType: boolean,
   field: string,
   defaultType: SmartLineSeriesType,
-  autoTypeStr: SmartLineSeriesType | undefined
+  autoTypeStr: SmartLineSeriesType | undefined,
 ): SmartLineSeriesType {
   // 优先级：字段指定 > 分组指定 > 自动判断 > 默认值
   if (seriesTypes?.[field]) return seriesTypes[field];
-  if (seriesTypes?.leftSeriesType && defaultType === "bar") {
+  if (seriesTypes?.leftSeriesType && defaultType === 'bar') {
     return seriesTypes.leftSeriesType;
   }
-  if (seriesTypes?.rightSeriesType && defaultType === "line") {
+  if (seriesTypes?.rightSeriesType && defaultType === 'line') {
     return seriesTypes.rightSeriesType;
   }
   if (autoSeriesType && autoTypeStr) return autoTypeStr;
@@ -127,7 +125,7 @@ function determineSeriesType(
 export const getFilteredDataSource = (
   dataSource: DataSourceItem[],
   xAxisField: string,
-  fields: string[]
+  fields: string[],
 ): DataSourceItem[] => {
   return dataSource.map((d) => {
     const filteredData: any = {
@@ -135,7 +133,7 @@ export const getFilteredDataSource = (
     };
     // 只保留属于左轴的字段
     fields.forEach((field) => {
-      if (d.hasOwnProperty(field)) {
+      if (Object.prototype.hasOwnProperty.call(d, field)) {
         filteredData[field] = d[field];
       }
     });
@@ -161,13 +159,7 @@ export function createSeriesConfig(params: SeriesConfig): SeriesType & {
     yAxisIndex,
   } = params;
 
-  const type = determineSeriesType(
-    seriesTypes,
-    autoSeriesType,
-    field,
-    defaultType,
-    autoTypeStr
-  );
+  const type = determineSeriesType(seriesTypes, autoSeriesType, field, defaultType, autoTypeStr);
 
   const config: any = {
     field,
@@ -176,7 +168,7 @@ export function createSeriesConfig(params: SeriesConfig): SeriesType & {
   };
 
   if (yAxisIndex !== undefined) config.yAxisIndex = yAxisIndex;
-  if (type === "line") config.smooth = true;
+  if (type === 'line') config.smooth = true;
 
   return config;
 }
@@ -191,7 +183,7 @@ export function createSeriesConfig(params: SeriesConfig): SeriesType & {
 export function buildXAxisConfig(
   mapConfig: MapConfigType | undefined,
   xAxisField: string,
-  xAxisConfig: XAxisConfig | undefined
+  xAxisConfig: XAxisConfig | undefined,
 ) {
   return {
     ...(mapConfig?.xAxis || {}),
@@ -208,17 +200,17 @@ export function buildXAxisConfig(
  */
 export function buildYAxisConfig(
   yAxisConfig: YAxisConfig | undefined,
-  isDual: boolean
+  isDual: boolean,
 ): YAxisType[] {
   const leftConfig: YAxisType = yAxisConfig?.leftConfig || {
-    type: "value",
-    name: isDual ? "左Y轴" : "Y轴",
+    type: 'value',
+    name: isDual ? '左Y轴' : 'Y轴',
   };
 
   if (!isDual) return [leftConfig];
   const rightConfig: YAxisType = yAxisConfig?.rightConfig || {
-    type: "value",
-    name: "右Y轴",
+    type: 'value',
+    name: '右Y轴',
   };
   return [leftConfig, rightConfig];
 }

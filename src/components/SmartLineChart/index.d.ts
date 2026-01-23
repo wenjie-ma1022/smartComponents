@@ -1,9 +1,8 @@
-import React from "react";
-import {
+import type {
   IProps as LineChartProps,
   MapConfigType,
   YAxisType,
-} from "@sto/sto-charts/es/line-chart/interface";
+} from '@sto/sto-charts/es/line-chart/interface';
 
 /**
  * 数据源项接口
@@ -32,7 +31,7 @@ export interface YAxisConfig {
   rightConfig?: YAxisType;
 }
 
-export type SmartLineSeriesType = "bar" | "line";
+export type SmartLineSeriesType = 'bar' | 'line';
 
 /**
  * 系列类型配置
@@ -75,7 +74,8 @@ export interface AutoDetectConfig {
 /**
  * SmartLineChart 组件属性
  */
-export interface SmartLineChartProps extends Omit<LineChartProps, "mapConfig"> {
+// eslint-disable-next-line no-undef
+export interface SmartLineChartProps extends Omit<LineChartProps, 'mapConfig'> {
   /** 图表配置 */
   mapConfig?: MapConfigType;
   /** 图表高度，透传 LineChartProps.height */
@@ -99,11 +99,6 @@ export interface SmartLineChartProps extends Omit<LineChartProps, "mapConfig"> {
   /** 自动检测配置 */
   autoHighlightConfig?: AutoDetectConfig;
 }
-
-/**
- * SmartLineChart 组件
- */
-export declare const SmartLineChart: React.FC<SmartLineChartProps>;
 
 export interface SeriesConfig {
   seriesTypes: SeriesTypeConfig | undefined;

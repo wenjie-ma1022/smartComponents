@@ -1,16 +1,15 @@
 /******************************************************
- * 自动双轴判断 + 自动左右 Y 轴推荐算法
+ * 自动双轴判断与左右 Y 轴推荐算法
+ *
+ * 决策思路（两步决策框架）：
+ * 1. 双轴必要性判断：基于数值类型（比例/绝对值）和量级差异判断
+ * 2. 左右轴分配：使用 K-Means++ 聚类算法智能分组
+ *
  * 输出：是否开启双轴，以及左右分组
  ******************************************************/
 
-import { kMeansPlusPlus } from "@/components/algorithmsLab/k_means++";
-import type {
-  Stats,
-  Metrics,
-  Vectors,
-  AssignResult,
-  SmartLineChartConfig,
-} from "./index.d";
+import type { Stats, Metrics, Vectors, AssignResult, SmartLineChartConfig } from './index.d';
+import { kMeansPlusPlus } from '@/components/algorithmsLab/k_means++';
 
 // --------------- 算法经验值配置（统一管理，便于调优） ---------------
 const MAX_GAP = 10; // 双轴判断：最大差距倍数
@@ -38,9 +37,7 @@ function shouldUseDualAxis(metrics: Metrics): boolean {
   //   指标数量小于2，不需要双轴图
   if (keys.length < 2) return false;
 
-  const allNumber = keys.every((k) =>
-    metrics[k].values.every((v) => typeof v === "number")
-  );
+  const allNumber = keys.every((k) => metrics[k].values.every((v) => typeof v === 'number'));
 
   //   指标值不是数字，不需要双轴图
   if (!allNumber) return false;
@@ -48,11 +45,11 @@ function shouldUseDualAxis(metrics: Metrics): boolean {
   //   数值类型判断（比例，绝对值）
   const types = keys.map((name) => {
     const { min, max } = metrics[name].stats;
-    return min >= -1 && max <= 1 ? "ratio" : "absolute";
+    return min >= -1 && max <= 1 ? 'ratio' : 'absolute';
   });
 
-  const hasRatio = types.includes("ratio");
-  const hasAbs = types.includes("absolute");
+  const hasRatio = types.includes('ratio');
+  const hasAbs = types.includes('absolute');
   if (hasRatio && hasAbs) return true;
 
   const maxVals = keys.map((k) => metrics[k].stats.max);
@@ -84,7 +81,7 @@ function assignLeftRight(metrics: Metrics): AssignResult {
 
   // k-means++ 聚类算法，k = 2
   const [left, right] = kMeansPlusPlus(vectors, 2).sort(
-    (a, b) => medianOfGroup(b) - medianOfGroup(a)
+    (a, b) => medianOfGroup(b) - medianOfGroup(a),
   );
 
   return { left, right };
@@ -93,7 +90,7 @@ function assignLeftRight(metrics: Metrics): AssignResult {
 // ----------------- 核心：是否需要双轴，以及左右轴分配数据  -----------------
 function autoAssignDualAxis(
   yAxisKeys: string[],
-  yAxisData: Record<string, number[]>
+  yAxisData: Record<string, number[]>,
 ): SmartLineChartConfig {
   if (!yAxisKeys?.length) return { isDual: false };
 

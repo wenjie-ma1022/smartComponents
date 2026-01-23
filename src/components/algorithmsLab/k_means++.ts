@@ -92,7 +92,7 @@ function computeCentroid(groupKeys: string[], vectors: Vectors): number[] {
 function computeMinDistancesWithExclusion(
   vec: number[][],
   centers: number[][],
-  selectedIndices: Set<number>
+  selectedIndices: Set<number>,
 ): { distances: number[]; sum: number; candidateIndices: number[] } {
   const distances: number[] = new Array(vec.length).fill(0);
   const candidateIndices: number[] = [];
@@ -133,7 +133,7 @@ function computeMinDistancesWithExclusion(
 function selectNextCenterIndex(
   distances: number[],
   sumDistances: number,
-  candidateIndices: number[]
+  candidateIndices: number[],
 ): number {
   // 边界情况：没有有效候选点
   if (candidateIndices.length === 0 || sumDistances < EPSILON) {
@@ -182,7 +182,7 @@ function computeInitQuality(vec: number[][], centers: number[][]): number {
  */
 function initializeCentersOnce(
   vec: number[][],
-  k: number
+  k: number,
 ): { centers: number[][]; indices: number[] } {
   const n = vec.length;
 
@@ -208,8 +208,11 @@ function initializeCentersOnce(
 
   // 2. 使用 D(x)² 加权概率选择剩余的 k-1 个中心点
   for (let c = 1; c < k; c++) {
-    const { distances, sum, candidateIndices } =
-      computeMinDistancesWithExclusion(vec, centers, selectedIndices);
+    const { distances, sum, candidateIndices } = computeMinDistancesWithExclusion(
+      vec,
+      centers,
+      selectedIndices,
+    );
 
     const nextIndex = selectNextCenterIndex(distances, sum, candidateIndices);
 
@@ -236,7 +239,7 @@ function initializeCentersOnce(
 function initializeCenters(
   vec: number[][],
   k: number,
-  retries: number = DEFAULT_INIT_RETRIES
+  retries: number = DEFAULT_INIT_RETRIES,
 ): number[][] {
   const n = vec.length;
 
@@ -316,7 +319,7 @@ function assignPointsToClustersWithTracking(
   keys: string[],
   vec: number[][],
   centers: number[][],
-  clusterCount: number
+  clusterCount: number,
 ): { clusters: string[][]; assignment: number[] } {
   const clusters: string[][] = Array.from({ length: clusterCount }, () => []);
   const assignment: number[] = new Array(vec.length);
@@ -349,7 +352,7 @@ function updateCenters(
   clusters: string[][],
   vectors: Vectors,
   vec: number[][],
-  oldCenters: number[][]
+  oldCenters: number[][],
 ): number[][] {
   return clusters.map((cluster, idx) => {
     if (cluster.length > 0) {
@@ -386,7 +389,7 @@ function updateCenters(
 function hasConverged(
   newCenters: number[][],
   oldCenters: number[][],
-  thresholdSquared: number
+  thresholdSquared: number,
 ): boolean {
   for (let c = 0; c < newCenters.length; c++) {
     if (distSquared(newCenters[c], oldCenters[c]) > thresholdSquared) {
@@ -406,7 +409,7 @@ function hasConverged(
 export function kMeansPlusPlus(
   vectors: Vectors,
   k: number = 2,
-  options: KMeansOptions = {}
+  options: KMeansOptions = {},
 ): string[][] {
   const {
     maxIterations = DEFAULT_MAX_ITERATIONS,
@@ -451,8 +454,12 @@ export function kMeansPlusPlus(
     iter++;
 
     // E步：分配点到最近的簇
-    const { clusters: newClusters, assignment } =
-      assignPointsToClustersWithTracking(keys, vec, centers, clusterCount);
+    const { clusters: newClusters, assignment } = assignPointsToClustersWithTracking(
+      keys,
+      vec,
+      centers,
+      clusterCount,
+    );
     clusters = newClusters;
 
     // 早期终止：如果分配没有变化，直接收敛
@@ -471,8 +478,10 @@ export function kMeansPlusPlus(
   }
 
   if (debug) {
+    // eslint-disable-next-line no-console
     console.log(`K-means++ 迭代次数: ${iter}, 聚类数量: ${clusterCount}`);
-    console.log("分组情况:", clusters);
+    // eslint-disable-next-line no-console
+    console.log('分组情况:', clusters);
   }
 
   return clusters;
@@ -490,10 +499,12 @@ export function kMeansPlusPlus(
  * @param clusters 聚类结果
  * @param maxSamples 最大采样数量，默认 500
  */
+
+// eslint-disable-next-line complexity
 export function computeSilhouetteScore(
   vectors: Vectors,
   clusters: string[][],
-  maxSamples: number = 500
+  maxSamples: number = 500,
 ): number {
   const keys = Object.keys(vectors);
   const n = keys.length;
