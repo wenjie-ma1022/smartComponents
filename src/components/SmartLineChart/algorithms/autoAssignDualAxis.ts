@@ -12,7 +12,7 @@ import type { Stats, Metrics, Vectors, AssignResult, SmartLineChartConfig } from
 import { kMeansPlusPlus } from '@/components/algorithmsLab/k_means++';
 
 // --------------- 算法经验值配置（统一管理，便于调优） ---------------
-const MAX_GAP = 10; // 双轴判断：最大差距倍数
+const MAX_GAP = 6; // 双轴判断：最大差距倍数
 
 // --------------- 工具函数：统计(最大值，最小值，中位数) -----------------------------
 function getStats(arr: number[]): Stats {
