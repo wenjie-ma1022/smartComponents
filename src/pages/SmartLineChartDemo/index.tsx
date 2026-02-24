@@ -1,10 +1,10 @@
-import React, { useMemo, useState } from "react";
-import { CnPage, CnCheckboxGroup } from "@sto/cn-ui";
-import { mockComplexData } from "./const";
-import SmartLineChart from "@/components/SmartLineChart";
+import React, { useMemo, useState } from 'react';
+import { CnPage, CnCheckboxGroup } from '@sto/cn-ui';
+import { mockComplexData } from './const';
+import { SmartLineChart } from '@/components';
 
 const SmartLineChartMockDataDemo: React.FC = () => {
-  const [selectedFields, setSelectedFields] = useState(["uv"]);
+  const [selectedFields, setSelectedFields] = useState(['uv']);
 
   const dataSource = useMemo(() => {
     const newDataSource = mockComplexData.map((item) => {
@@ -24,9 +24,7 @@ const SmartLineChartMockDataDemo: React.FC = () => {
     <CnPage hasGutter>
       <div style={{ marginBottom: 24 }}>
         <h3>SmartLineChart Mock Data Demo</h3>
-        <p>
-          数据包含：用户访问量(UV)、页面浏览量(PV)、点击率(CTR)、转化率(CVR)、投资回报率(ROI)
-        </p>
+        <p>数据包含：用户访问量(UV)、页面浏览量(PV)、点击率(CTR)、转化率(CVR)、投资回报率(ROI)</p>
       </div>
       <CnCheckboxGroup
         onChange={(value) => {
@@ -34,11 +32,11 @@ const SmartLineChartMockDataDemo: React.FC = () => {
         }}
         value={selectedFields}
         dataSource={[
-          { label: "uv", value: "uv" },
-          { label: "pv", value: "pv" },
-          { label: "ctr", value: "ctr" },
-          { label: "cvr", value: "cvr" },
-          { label: "roi", value: "roi" },
+          { label: 'uv', value: 'uv' },
+          { label: 'pv', value: 'pv' },
+          { label: 'ctr', value: 'ctr' },
+          { label: 'cvr', value: 'cvr' },
+          { label: 'roi', value: 'roi' },
         ]}
         style={{ width: 400 }}
       />

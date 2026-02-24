@@ -1,28 +1,24 @@
-import React, { useMemo } from "react";
-import { PieChart } from "@sto/sto-charts";
-import type { SmartPieChartProps } from "./index.d";
+import React, { useMemo } from 'react';
+import { PieChart } from '@sto/sto-charts';
+import type { SmartPieChartProps } from './index.d';
 import {
   generateLegend,
   generateColors,
   generateLabel,
   generateSmartPieOption,
-} from "./algorithms";
+} from './algorithms';
 
-const SmartPieChart: React.FC<SmartPieChartProps> = ({
-  dataSource,
-  height = 300,
-}) => {
+const SmartPieChart: React.FC<SmartPieChartProps> = ({ dataSource, height = 300 }) => {
   const config = useMemo(() => {
-    const { feature, pieType, merged, marked } =
-      generateSmartPieOption(dataSource);
+    const { feature, pieType, merged, marked } = generateSmartPieOption(dataSource);
     debugger;
 
     return {
       legend: generateLegend(feature.count),
       series: [
         {
-          type: "pie",
-          radius: pieType === "cycle" ? ["40%", "70%"] : "70%",
+          type: 'pie',
+          radius: pieType === 'cycle' ? ['40%', '70%'] : '70%',
           data: marked,
           color: generateColors(marked),
           label: generateLabel(feature.count),
@@ -47,3 +43,4 @@ const SmartPieChart: React.FC<SmartPieChartProps> = ({
 };
 
 export default SmartPieChart;
+export type { SmartPieChartProps, PieItem } from './index.d';

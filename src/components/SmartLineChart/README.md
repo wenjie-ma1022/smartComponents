@@ -45,12 +45,14 @@ function Demo() {
       dataSource={dataSource}
       xAxisField="date"
       yAxisConfig={{
-        leftName: '销售额',
-        rightName: '点击率',
-        leftFormat: '¥',
-        rightFormat: '%',
-        leftRetain: 0,
-        rightRetain: 2,
+        leftConfig: {
+          type: 'value',
+          name: '销售额',
+        },
+        rightConfig: {
+          type: 'value',
+          name: '点击率',
+        },
       }}
     />
   );
@@ -139,10 +141,14 @@ function Demo() {
       tooltipTheme="dark"
       showLabelValue={false}
       yAxisConfig={{
-        leftName: '访问量',
-        rightName: '转化率',
-        rightFormat: '%',
-        rightRetain: 2,
+        leftConfig: {
+          type: 'value',
+          name: '访问量',
+        },
+        rightConfig: {
+          type: 'value',
+          name: '转化率',
+        },
       }}
       seriesTypes={{
         uv: 'bar',
@@ -157,25 +163,46 @@ function Demo() {
 
 ## API 属性
 
-| 属性           | 类型                | 默认值   | 说明                          |
-| -------------- | ------------------- | -------- | ----------------------------- |
-| dataSource     | `DataSourceItem[]`  | -        | **必填** 数据源数组           |
-| xAxisField     | `string`            | `'date'` | X 轴字段名                    |
-| yAxisConfig    | `YAxisFormatConfig` | -        | Y 轴格式化配置                |
-| seriesTypes    | `SeriesTypeConfig`  | -        | 指定各字段的图表类型          |
-| autoSeriesType | `boolean`           | `true`   | 是否自动判断使用 bar/line     |
-| ...restProps   | `LineChartProps`    | -        | 其他 LineChart 组件支持的属性 |
+| 属性                | 类型                  | 默认值   | 说明                          |
+| ------------------- | --------------------- | -------- | ----------------------------- |
+| dataSource          | `DataSourceItem[]`    | -        | **必填** 数据源数组           |
+| xAxisField          | `string`              | -        | **必填** X 轴字段名           |
+| xAxisConfig         | `XAxisConfig`         | -        | X 轴配置                      |
+| yAxisConfig         | `YAxisConfig`         | -        | Y 轴配置                      |
+| seriesTypes         | `SeriesTypeConfig`    | -        | 指定各字段的图表类型          |
+| seriesNameMap       | `Record<string, string>` | -     | 指定各字段的显示名称          |
+| autoSeriesType      | `boolean`             | `true`   | 是否自动判断使用 bar/line     |
+| autoHighlightConfig | `AutoDetectConfig`    | -        | 异常值/关键值自动检测配置     |
+| ...restProps        | `LineChartProps`      | -        | 其他 LineChart 组件支持的属性 |
 
-### YAxisFormatConfig
+### XAxisConfig
 
 ```typescript
-interface YAxisFormatConfig {
-  leftName?: string; // 左Y轴名称
-  rightName?: string; // 右Y轴名称
-  leftFormat?: string; // 左Y轴格式化字符串（如 '%', '¥'）
-  rightFormat?: string; // 右Y轴格式化字符串
-  leftRetain?: number; // 左Y轴保留小数位数
-  rightRetain?: number; // 右Y轴保留小数位数
+interface XAxisConfig {
+  name?: string;   // X轴名称
+  format?: string; // X轴格式化字符串
+}
+```
+
+### YAxisConfig
+
+```typescript
+interface YAxisConfig {
+  leftConfig?: YAxisType;  // 左Y轴配置（完整的 ECharts Y轴配置）
+  rightConfig?: YAxisType; // 右Y轴配置（完整的 ECharts Y轴配置）
+}
+
+// YAxisType 示例
+interface YAxisType {
+  type?: 'value' | 'category' | 'time' | 'log';
+  name?: string;           // Y轴名称
+  nameLocation?: 'start' | 'middle' | 'end';
+  min?: number | string;   // 最小值
+  max?: number | string;   // 最大值
+  axisLabel?: {
+    formatter?: string | Function; // 标签格式化
+  };
+  // ...其他 ECharts Y轴配置
 }
 ```
 

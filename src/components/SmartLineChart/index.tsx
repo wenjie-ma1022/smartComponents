@@ -8,23 +8,20 @@
  * 4. 支持自定义左右 Y 轴名称、格式化
  */
 
-import React from 'react';
+import React, { useMemo, useEffect } from 'react';
 import type { MapConfigType, SeriesType } from '@sto/sto-charts/es/line-chart/interface';
 import { LineChart, use } from '@sto/sto-charts';
 import { MarkPointComponent } from '@sto/sto-charts/components';
 
-import {
-  autoAssignDualAxis,
-  autoSetSeriesType,
-  autoDetectHighlightPoints,
-} from './algorithms/index';
+import { autoAssignDualAxis } from './algorithms/index';
 import type { SmartLineChartProps } from './index.d';
 import {
-  createSeriesConfig,
   buildXAxisConfig,
   buildYAxisConfig,
-  getFilteredDataSource,
-  buildMarkPointConfig,
+  DEFAULT_HIGHLIGHT_CONFIG,
+  generateSingleAxisSeries,
+  generateDualAxisSeries,
+  validateProps,
 } from './utils';
 
 use([MarkPointComponent]);
@@ -40,147 +37,83 @@ const SmartLineChart: React.FC<SmartLineChartProps> = (props) => {
     seriesTypes, // 指定各字段的图表类型
     seriesNameMap, // 指定各字段的名称
     autoSeriesType = !seriesTypes, // 如果传入了 seriesTypes，使用手动模式；否则使用自动模式
-    autoHighlightConfig = {
-      checkOutliers: true,
-      checkMaxMin: true,
-      checkSharpChange: true,
-      checkTrendDeviation: true,
-    }, // 是否自动检测异常值/关键值
+    autoHighlightConfig = DEFAULT_HIGHLIGHT_CONFIG, // 是否自动检测异常值/关键值
     ...restProps // 其他属性
   } = props;
 
+  // Props 校验
+  useEffect(() => {
+    validateProps(xAxisField, dataSource);
+  }, [xAxisField, dataSource]);
+
   // 生成图表配置
-  const smartMapConfig = React.useMemo<MapConfigType | undefined>(() => {
-    if (!xAxisField) {
-      console.error('xAxisField is required in mapConfig or props');
+  const smartMapConfig = useMemo<MapConfigType | undefined>(() => {
+    // 早期返回：必填参数校验
+    if (!xAxisField || !dataSource?.length) return undefined;
+
+    try {
+      const yAxisKeys = Object.keys(dataSource[0]).filter((k) => k !== xAxisField);
+
+      if (!yAxisKeys.length) {
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('SmartLineChart: No Y-axis fields found in dataSource.');
+        }
+        return undefined;
+      }
+
+      const yAxisData = yAxisKeys.reduce((acc, key) => {
+        acc[key] = dataSource.map((d) => d[key]);
+        return acc;
+      }, {});
+
+      // 双轴推荐和聚类结果
+      const result = autoAssignDualAxis(yAxisKeys, yAxisData);
+
+      let series: SeriesType[];
+
+      // 单轴情况
+      if (!result.isDual) {
+        series = generateSingleAxisSeries({
+          yAxisKeys,
+          yAxisData,
+          dataSource,
+          xAxisField,
+          seriesTypes,
+          autoSeriesType,
+          seriesNameMap,
+          autoHighlightConfig,
+        });
+      } else {
+        // 双轴情况
+        if (!result.category) return undefined;
+        const { left, right } = result.category;
+
+        series = generateDualAxisSeries({
+          left,
+          right,
+          yAxisData,
+          dataSource,
+          xAxisField,
+          seriesTypes,
+          autoSeriesType,
+          seriesNameMap,
+          autoHighlightConfig,
+        });
+      }
+
+      return {
+        ...(mapConfig || {}),
+        xAxis: buildXAxisConfig(mapConfig, xAxisField, xAxisConfig),
+        yAxis: buildYAxisConfig(yAxisConfig, result.isDual),
+        series,
+      };
+    } catch (error) {
+      // 错误边界：捕获算法执行异常，降级为空配置
+      if (process.env.NODE_ENV === 'development') {
+        console.error('[SmartLineChart] Error generating chart config:', error);
+      }
       return undefined;
     }
-    if (!dataSource?.length) return undefined;
-
-    const yAxisKeys = Object.keys(dataSource[0]).filter((k) => k !== xAxisField);
-
-    if (!yAxisKeys.length) return undefined;
-
-    const yAxisData = yAxisKeys.reduce((acc, key) => {
-      acc[key] = dataSource.map((d) => d[key]);
-      return acc;
-    }, {});
-
-    // 双轴推荐和聚类结果
-    const result = autoAssignDualAxis(yAxisKeys, yAxisData);
-
-    let series: SeriesType[];
-
-    // 单轴情况
-    if (!result.isDual) {
-      // 自动判断图表类型
-      const autoTypeStr = autoSeriesType ? autoSetSeriesType(dataSource, xAxisField) : undefined;
-
-      series = yAxisKeys.map((k) => {
-        const config = createSeriesConfig({
-          seriesTypes,
-          autoSeriesType,
-          seriesNameMap,
-          field: k,
-          defaultType: 'bar',
-          autoTypeStr,
-        });
-
-        // 异常值/关键值自动检测并生成 markPoint
-        const itemHighlightPoints = autoDetectHighlightPoints(
-          yAxisData[k],
-          config.type,
-          autoHighlightConfig,
-        );
-
-        // 添加 markPoint 高亮配置
-        const markPoint = buildMarkPointConfig(itemHighlightPoints, dataSource, xAxisField);
-        if (markPoint) {
-          config.markPoint = markPoint;
-        }
-
-        return config;
-      });
-    } else {
-      // 双轴情况
-      if (!result.category) return undefined;
-      const { left, right } = result.category;
-
-      const leftDataSource = getFilteredDataSource(dataSource, xAxisField, left);
-
-      const rightDataSource = getFilteredDataSource(dataSource, xAxisField, right);
-
-      // 自动判断图表类型
-      const leftAutoTypeStr = autoSeriesType
-        ? autoSetSeriesType(leftDataSource, xAxisField)
-        : undefined;
-
-      const rightAutoTypeStr = autoSeriesType
-        ? autoSetSeriesType(rightDataSource, xAxisField)
-        : undefined;
-
-      const leftSeries = left.map((k) => {
-        const config = createSeriesConfig({
-          seriesTypes,
-          autoSeriesType,
-          seriesNameMap,
-          field: k,
-          defaultType: 'bar',
-          autoTypeStr: leftAutoTypeStr,
-          yAxisIndex: 0,
-        });
-
-        // 异常值/关键值自动检测并生成 markPoint
-        const itemHighlightPoints = autoDetectHighlightPoints(
-          yAxisData[k],
-          config.type,
-          autoHighlightConfig,
-        );
-        const markPoint = buildMarkPointConfig(itemHighlightPoints, dataSource, xAxisField);
-        if (markPoint) {
-          config.markPoint = markPoint;
-        }
-
-        return config;
-      });
-
-      const rightSeries = right.map((k) => {
-        const config = createSeriesConfig({
-          seriesTypes,
-          autoSeriesType,
-          seriesNameMap,
-          field: k,
-          defaultType: 'line',
-          autoTypeStr: rightAutoTypeStr,
-          yAxisIndex: 1,
-        });
-
-        // 异常值/关键值自动检测并生成 markPoint
-        const itemHighlightPoints = autoDetectHighlightPoints(
-          yAxisData[k],
-          config.type,
-          autoHighlightConfig,
-        );
-        const markPoint = buildMarkPointConfig(itemHighlightPoints, dataSource, xAxisField);
-        if (markPoint) {
-          config.markPoint = markPoint;
-        }
-
-        return config;
-      });
-
-      series = [...leftSeries, ...rightSeries];
-    }
-
-    // eslint-disable-next-line no-console
-    console.log('series:', series);
-
-    return {
-      ...(mapConfig || {}),
-      xAxis: buildXAxisConfig(mapConfig, xAxisField, xAxisConfig),
-      yAxis: buildYAxisConfig(yAxisConfig, result.isDual),
-      series,
-    };
   }, [
     dataSource,
     autoSeriesType,
@@ -193,7 +126,20 @@ const SmartLineChart: React.FC<SmartLineChartProps> = (props) => {
     autoHighlightConfig,
   ]);
 
+  // 错误降级：如果配置生成失败，返回空状态提示
+  if (!smartMapConfig && xAxisField && dataSource?.length) {
+    if (process.env.NODE_ENV === 'development') {
+      return (
+        <div style={{ padding: '20px', textAlign: 'center', color: '#999' }}>
+          图表配置生成失败，请检查数据格式或查看控制台错误信息
+        </div>
+      );
+    }
+    return null;
+  }
+
   return <LineChart dataSource={dataSource} mapConfig={smartMapConfig} {...restProps} />;
 };
 
 export default SmartLineChart;
+export type { SmartLineChartProps } from './index.d';

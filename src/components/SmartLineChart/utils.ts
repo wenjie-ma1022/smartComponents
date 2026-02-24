@@ -8,6 +8,7 @@ import type {
   SmartLineSeriesType,
 } from './index.d';
 import type { HighlightPoint } from './algorithms/autoDetectOutliersAndKeys';
+import { autoSetSeriesType, autoDetectHighlightPoints } from './algorithms/index';
 
 /** 高亮点样式配置 */
 const HIGHLIGHT_STYLES = {
@@ -213,4 +214,201 @@ export function buildYAxisConfig(
     name: '右Y轴',
   };
   return [leftConfig, rightConfig];
+}
+
+/**
+ * 默认高亮配置（抽离为常量以优化性能）
+ */
+export const DEFAULT_HIGHLIGHT_CONFIG = {
+  checkOutliers: true,
+  checkMaxMin: true,
+  checkSharpChange: true,
+  checkTrendDeviation: true,
+};
+
+/**
+ * 生成单轴系列配置（降低主函数复杂度）
+ * @param params - 配置参数
+ * @returns 系列配置数组
+ */
+export function generateSingleAxisSeries(params: {
+  yAxisKeys: string[];
+  yAxisData: any;
+  dataSource: any[];
+  xAxisField: string;
+  seriesTypes: any;
+  autoSeriesType: boolean;
+  seriesNameMap: any;
+  autoHighlightConfig: any;
+}): SeriesType[] {
+  const {
+    yAxisKeys,
+    yAxisData,
+    dataSource,
+    xAxisField,
+    seriesTypes,
+    autoSeriesType,
+    seriesNameMap,
+    autoHighlightConfig,
+  } = params;
+
+  // 自动判断图表类型
+  const autoTypeStr = autoSeriesType ? autoSetSeriesType(dataSource, xAxisField) : undefined;
+
+  return yAxisKeys.map((k) => {
+    const config = createSeriesConfig({
+      seriesTypes,
+      autoSeriesType,
+      seriesNameMap,
+      field: k,
+      defaultType: 'bar',
+      autoTypeStr,
+    });
+
+    // 异常值/关键值自动检测并生成 markPoint
+    const itemHighlightPoints = autoDetectHighlightPoints(
+      yAxisData[k],
+      config.type,
+      autoHighlightConfig,
+    );
+
+    // 添加 markPoint 高亮配置
+    const markPoint = buildMarkPointConfig(itemHighlightPoints, dataSource, xAxisField);
+    if (markPoint) {
+      config.markPoint = markPoint;
+    }
+
+    return config;
+  });
+}
+
+/**
+ * 生成双轴系列配置（降低主函数复杂度）
+ * @param params - 配置参数
+ * @returns 系列配置数组
+ */
+export function generateDualAxisSeries(params: {
+  left: string[];
+  right: string[];
+  yAxisData: any;
+  dataSource: any[];
+  xAxisField: string;
+  seriesTypes: any;
+  autoSeriesType: boolean;
+  seriesNameMap: any;
+  autoHighlightConfig: any;
+}): SeriesType[] {
+  const {
+    left,
+    right,
+    yAxisData,
+    dataSource,
+    xAxisField,
+    seriesTypes,
+    autoSeriesType,
+    seriesNameMap,
+    autoHighlightConfig,
+  } = params;
+
+  const leftDataSource = getFilteredDataSource(dataSource, xAxisField, left);
+  const rightDataSource = getFilteredDataSource(dataSource, xAxisField, right);
+
+  // 自动判断图表类型
+  const leftAutoTypeStr = autoSeriesType
+    ? autoSetSeriesType(leftDataSource, xAxisField)
+    : undefined;
+
+  const rightAutoTypeStr = autoSeriesType
+    ? autoSetSeriesType(rightDataSource, xAxisField)
+    : undefined;
+
+  const leftSeries = left.map((k) => {
+    const config = createSeriesConfig({
+      seriesTypes,
+      autoSeriesType,
+      seriesNameMap,
+      field: k,
+      defaultType: 'bar',
+      autoTypeStr: leftAutoTypeStr,
+      yAxisIndex: 0,
+    });
+
+    const itemHighlightPoints = autoDetectHighlightPoints(
+      yAxisData[k],
+      config.type,
+      autoHighlightConfig,
+    );
+    const markPoint = buildMarkPointConfig(itemHighlightPoints, dataSource, xAxisField);
+    if (markPoint) {
+      config.markPoint = markPoint;
+    }
+
+    return config;
+  });
+
+  const rightSeries = right.map((k) => {
+    const config = createSeriesConfig({
+      seriesTypes,
+      autoSeriesType,
+      seriesNameMap,
+      field: k,
+      defaultType: 'line',
+      autoTypeStr: rightAutoTypeStr,
+      yAxisIndex: 1,
+    });
+
+    const itemHighlightPoints = autoDetectHighlightPoints(
+      yAxisData[k],
+      config.type,
+      autoHighlightConfig,
+    );
+    const markPoint = buildMarkPointConfig(itemHighlightPoints, dataSource, xAxisField);
+    if (markPoint) {
+      config.markPoint = markPoint;
+    }
+
+    return config;
+  });
+
+  return [...leftSeries, ...rightSeries];
+}
+
+/**
+ * Props 校验辅助函数
+ * @param xAxisField - X轴字段
+ * @param dataSource - 数据源
+ */
+export function validateProps(xAxisField: string | undefined, dataSource: any[] | undefined) {
+  if (process.env.NODE_ENV !== 'development') return;
+
+  // 校验 xAxisField
+  if (!xAxisField) {
+    console.error(
+      'SmartLineChart: xAxisField is required. Please provide xAxisField prop or mapConfig.xAxis.field.',
+    );
+    return;
+  }
+
+  // 校验 dataSource
+  if (!dataSource) {
+    console.error('SmartLineChart: dataSource is required.');
+    return;
+  }
+
+  if (!Array.isArray(dataSource)) {
+    console.error('SmartLineChart: dataSource must be an array.');
+    return;
+  }
+
+  // 校验数据源中是否包含 xAxisField
+  if (dataSource.length > 0) {
+    const firstItem = dataSource[0];
+    if (!Object.prototype.hasOwnProperty.call(firstItem, xAxisField)) {
+      console.warn(
+        `SmartLineChart: xAxisField "${xAxisField}" not found in dataSource. Available fields: ${Object.keys(
+          firstItem,
+        ).join(', ')}`,
+      );
+    }
+  }
 }
